@@ -48,15 +48,16 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
     public static final String META_BUCKET_NAME = "META";
     private static final String TYPE_LABEL_FILE_NAME = "TYPELABEL";
 
-    private static final String LXP_EXISTS = "MATCH (o: STORR_LXP { STORR_ID:$id }) RETURN o";
+    private static final String LXP_EXISTS = "MATCH (o:STORR_LXP { STORR_ID:$id } ) RETURN o";
     private static final String CREATE_LXP_QUERY = "CREATE (n:STORR_LXP $props) RETURN n";
     private static final String ADD_LXP_TO_BUCKET_QUERY = "MATCH(b:STORR_BUCKET),(l:STORR_LXP) WHERE id(b)=$bucket_id AND id(l)=$new_id CREATE (b)-[r:STORR_MEMBER]->(l)";
     private static final String GET_LXPS_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id RETURN l";
     private static final String GET_LXP_BY_STORR_ID_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id AND l.STORR_ID=$storr_id RETURN l";
-    private static final String UPDATE_LXP_PARTIAL_QUERY_BY_STORR_ID = "MATCH (l:STORR_LXP) WHERE l.STORR_ID=$storr_id SET l={ ";
+    private static final String UPDATE_LXP_PARTIAL_QUERY_BY_STORR_ID = "MATCH (l:STORR_LXP { STORR_ID:$storr_id } ) SET l={ ";
     private static final String GET_LXP_OIDS_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id RETURN l.STORR_ID";
     private static final String GET_TYPE_LABEL_QUERY = "MATCH(b:STORR_BUCKET) WHERE id(b)=$bucket_id RETURN b.TYPE_LABEL_ID";
     private static final String SET_TYPE_LABEL_QUERY = "MATCH(b:STORR_BUCKET) WHERE id(b)=$bucket_id SET b.TYPE_LABEL_ID =$type_label";
+    private static final String DELETE_OID_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id AND l.STORR_ID=$to_delete_id DETACH DELETE l";
 
     private final IRepository repository;     // the repository in which the bucket is stored
 
@@ -325,7 +326,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         query.append(UPDATE_LXP_PARTIAL_QUERY_BY_STORR_ID);
 
         Map<String, Object> props = record_to_update.serializeFieldsToMap();
-        props.remove("STORR_ID"); // not going to update this!
+        query.append("STORR_ID"); query.append(" : "); query.append(record_to_update.getId()); query.append(", ");
         for (Map.Entry<String, Object> entry : props.entrySet()) {
             query.append(entry.getKey());
             query.append(" : ");
@@ -455,15 +456,17 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         object_cache = newCache(repository, cache_size, this); // There may be extent references to these objects in the heap which should be invalidated.
     }
 
-    /**
-     * ******** Transaction support **********
-     */
-
     @Override
     public void delete(final long oid) throws BucketException {
 
-        System.out.println("Unimplemented");   // TODO 8888
-        throw new RuntimeException("Unimplemented");
+        try (Session session = bridge.getNewSession();) {
+
+            session.writeTransaction(tx -> tx.run(DELETE_OID_QUERY, parameters("bucket_id", this.neo_id, "to_delete_id", oid)));
+
+        } catch ( Exception e ) {
+            throw new BucketException(e);
+        }
+        object_cache.invalidate(oid);
     }
 
 }
