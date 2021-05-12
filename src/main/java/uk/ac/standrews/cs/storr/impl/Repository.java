@@ -75,7 +75,7 @@ public class Repository implements IRepository {
     }
 
     @Override
-    public <T extends PersistentObject> IBucket<T> makeBucket(final String bucket_name, Class<T> bucketType) throws RepositoryException {
+    public <T extends LXP> IBucket<T> makeBucket(final String bucket_name, Class<T> bucketType) throws RepositoryException {
 
         makeBucketInNeo(bucket_name);
         IBucket<T> bucket = new NeoBackedBucket(this, bucket_name, bucketType, getNeoBucketID(bucket_name));
@@ -157,7 +157,7 @@ public class Repository implements IRepository {
     }
 
     @Override
-    public <T extends PersistentObject> IBucket<T> getBucket(final String bucket_name, final Class<T> bucketType) throws RepositoryException {
+    public <T extends LXP> IBucket<T> getBucket(final String bucket_name, final Class<T> bucketType) throws RepositoryException {
 
         if (bucketExists(bucket_name)) {
 

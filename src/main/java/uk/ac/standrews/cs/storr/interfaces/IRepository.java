@@ -47,7 +47,7 @@ public interface IRepository {
      * @return the newly created repository
      * @throws RepositoryException if a bucket with the name previously exists or if something goes wrong.
      */
-    <T extends PersistentObject> IBucket<T> makeBucket(final String name, Class<T> bucketType) throws RepositoryException;
+    <T extends LXP> IBucket<T> makeBucket(final String name, Class<T> bucketType) throws RepositoryException;
 
     <T extends LXP> IIdtoLXPMap<T> makeIdtoLXPMap(final String name, Class<T> bucketType ) throws RepositoryException;
 
@@ -81,7 +81,7 @@ public interface IRepository {
      * @return the bucket with the given name, if it exists and is type compatible
      * @throws RepositoryException if the bucket does not exist or if something goes wrong.
      */
-    <T extends PersistentObject> IBucket<T> getBucket(final String name, Class<T> bucketType) throws RepositoryException;
+    <T extends LXP> IBucket<T> getBucket(final String name, Class<T> bucketType) throws RepositoryException;
 
     /**
      * @param name the name of the field_storage being looked up

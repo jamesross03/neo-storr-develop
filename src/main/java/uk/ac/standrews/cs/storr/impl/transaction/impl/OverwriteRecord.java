@@ -14,29 +14,24 @@
  * You should have received a copy of the GNU General Public License along with storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.storr.impl.transaction.interfaces;
+package uk.ac.standrews.cs.storr.impl.transaction.impl;
 
 import uk.ac.standrews.cs.storr.impl.LXP;
-import uk.ac.standrews.cs.storr.impl.exceptions.StoreException;
-import uk.ac.standrews.cs.storr.impl.transaction.exceptions.TransactionFailedException;
-import uk.ac.standrews.cs.storr.interfaces.IBucket;
+import uk.ac.standrews.cs.storr.impl.NeoBackedBucket;
 
 /**
- * Modelled on com.google.appengine.api.datastore API
- * <p>
- * Created by al on 05/01/15.
+ * Created by al on 03/02/15.
  */
-public interface ITransaction {
+public class OverwriteRecord {
 
-    void commit() throws TransactionFailedException, StoreException;
+    public NeoBackedBucket bucket;
+    public LXP obj;
 
-    void rollback() throws IllegalStateException;
+    public <T extends LXP> OverwriteRecord(NeoBackedBucket bucket, LXP obj) {
+        this.bucket = bucket;
+        this.obj = obj;
+    }
 
-    boolean isActive();
 
-    String getId();
 
-    org.neo4j.driver.Transaction getNeoTransaction();
-
-    void add(IBucket bucket, LXP lxp);
 }
