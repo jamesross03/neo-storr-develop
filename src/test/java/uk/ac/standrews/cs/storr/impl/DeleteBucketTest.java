@@ -16,41 +16,45 @@
  */
 package uk.ac.standrews.cs.storr.impl;
 
+
 import org.junit.Before;
+import org.junit.Test;
 import uk.ac.standrews.cs.storr.impl.exceptions.BucketException;
+import uk.ac.standrews.cs.storr.impl.exceptions.IllegalKeyException;
 import uk.ac.standrews.cs.storr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.storr.impl.exceptions.StoreException;
 import uk.ac.standrews.cs.storr.interfaces.IRepository;
-import uk.ac.standrews.cs.storr.interfaces.IStore;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 
-public abstract class CommonTest {
+import static org.junit.Assert.assertFalse;
 
-    static final String REPOSITORY_NAME = "repo";
+public class DeleteBucketTest extends CommonTest {
 
-    private static final boolean DEBUG = true;
-
-    protected IStore store;
-    protected IRepository repository;
-
-    Path store_path;
+    private static String generic_repo_name1 = "DELETE REPO";
+    private static String generic_bucket_name1 = "DELETE BUCKET1";
 
     @Before
-    public void setUp() throws RepositoryException, IOException, StoreException, URISyntaxException, BucketException {
+    public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
 
-        store = new Store();
-
-        if (DEBUG) {
-            System.out.println("STORE has been created");
-        }
-        try {
-            repository = store.makeRepository(REPOSITORY_NAME);
-        } catch( Exception e ) {
-            System.out.println( "Repository: " + REPOSITORY_NAME + " already existed - getting it");
-            repository = store.getRepository(REPOSITORY_NAME);
-        }
+        super.setUp();
     }
+
+    @Test
+    public synchronized void testRepoCreateAndDelete() throws RepositoryException, IllegalKeyException, BucketException {
+
+        IRepository repo = store.makeRepository(generic_repo_name1);
+        repo.makeBucket(generic_bucket_name1);
+
+        repo.deleteBucket(generic_bucket_name1);
+
+        assertFalse( repo.bucketExists(generic_bucket_name1));
+
+        // create again to be sure...
+
+        repo.makeBucket(generic_bucket_name1);
+        repo.deleteBucket(generic_bucket_name1);
+        store.deleteRepository(generic_repo_name1);
+    }
+
 }

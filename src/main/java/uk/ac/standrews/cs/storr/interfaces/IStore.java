@@ -18,6 +18,7 @@ package uk.ac.standrews.cs.storr.interfaces;
 
 import uk.ac.standrews.cs.storr.impl.TypeFactory;
 import uk.ac.standrews.cs.storr.impl.exceptions.RepositoryException;
+import uk.ac.standrews.cs.storr.impl.transaction.interfaces.ITransactionManager;
 import uk.ac.standrews.cs.storr.util.NeoDbCypherBridge;
 
 import java.util.Iterator;
@@ -35,6 +36,11 @@ import java.util.Iterator;
  * Created by al on 06/06/2014.
  */
 public interface IStore {
+
+    /**
+     * @return the transaction manager associated with the store
+     */
+    ITransactionManager getTransactionManager();
 
     TypeFactory getTypeFactory();
 
@@ -75,5 +81,4 @@ public interface IStore {
      * @return the neo4J bridge created by the store
      */
     NeoDbCypherBridge getBridge();
-
 }

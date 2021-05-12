@@ -16,26 +16,21 @@
  */
 package uk.ac.standrews.cs.storr.impl;
 
-import uk.ac.standrews.cs.storr.impl.exceptions.IllegalKeyException;
-import uk.ac.standrews.cs.storr.impl.exceptions.PersistentObjectException;
+import uk.ac.standrews.cs.storr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.storr.interfaces.IBucket;
-import uk.ac.standrews.cs.storr.interfaces.IRepository;
-import uk.ac.standrews.cs.utilities.JSONReader;
-
-import java.util.List;
+import uk.ac.standrews.cs.storr.interfaces.IOutputStream;
 
 /**
- * Created by al on 22/11/2016.
+ * Created by al on 28/04/2014.
  */
-public class ClassWithListOfScalars extends DynamicLXP {
+public class NeoBackedOutputStream<T extends PersistentObject> extends BucketBackedAbstractStream<T> implements IOutputStream<T> {
 
-
-    public ClassWithListOfScalars(long persistent_Object_id, JSONReader reader, IRepository repository, IBucket bucket) throws PersistentObjectException, IllegalKeyException {
-        super(persistent_Object_id, reader, bucket );
+    public NeoBackedOutputStream(final IBucket<T> bucket) {
+        super(bucket);
     }
 
-    public ClassWithListOfScalars(int an_int, List<Integer> list) {
-        this.put("AN_INT", an_int);
-        this.put("A_LIST", list);
+    @Override
+    public void add(final T record) throws BucketException {
+        bucket.makePersistent(record);
     }
 }

@@ -14,28 +14,25 @@
  * You should have received a copy of the GNU General Public License along with storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.storr.impl;
+package uk.ac.standrews.cs.storr.impl.transaction.interfaces;
 
-import uk.ac.standrews.cs.storr.impl.exceptions.IllegalKeyException;
-import uk.ac.standrews.cs.storr.impl.exceptions.PersistentObjectException;
-import uk.ac.standrews.cs.storr.interfaces.IBucket;
-import uk.ac.standrews.cs.utilities.JSONReader;
-
-import java.util.List;
+import uk.ac.standrews.cs.storr.impl.exceptions.StoreException;
+import uk.ac.standrews.cs.storr.impl.transaction.exceptions.TransactionFailedException;
 
 /**
- * Created by al on 22/11/2016.
+ * Modelled on com.google.appengine.api.datastore API
+ * <p>
+ * Created by al on 05/01/15.
  */
-public class ClassWithListOfRefs extends DynamicLXP {
+public interface ITransaction {
 
+    void commit() throws TransactionFailedException, StoreException;
 
-    public ClassWithListOfRefs(long persistent_Object_id, JSONReader reader, IBucket bucket ) throws PersistentObjectException, IllegalKeyException {
-        super(persistent_Object_id, reader, bucket);
-    }
+    void rollback() throws IllegalStateException;
 
-    public ClassWithListOfRefs(int id, List<DynamicLXP> list) {
-        this.put("AN_INT", id);
-        this.put("A_LIST", list);
-    }
+    boolean isActive();
 
+    String getId();
+
+    org.neo4j.driver.Transaction getNeoTransaction();
 }

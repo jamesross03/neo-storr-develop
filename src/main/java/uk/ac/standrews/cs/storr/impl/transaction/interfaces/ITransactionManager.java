@@ -14,23 +14,18 @@
  * You should have received a copy of the GNU General Public License along with storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.storr.impl;
+package uk.ac.standrews.cs.storr.impl.transaction.interfaces;
 
-import uk.ac.standrews.cs.storr.impl.exceptions.BucketException;
-import uk.ac.standrews.cs.storr.interfaces.IBucket;
-import uk.ac.standrews.cs.storr.interfaces.IOutputStream;
+import uk.ac.standrews.cs.storr.impl.transaction.exceptions.TransactionFailedException;
 
 /**
- * Created by al on 28/04/2014.
+ * Created by al on 05/01/15.
  */
-public class BucketBackedOutputStream<T extends PersistentObject> extends BucketBackedAbstractStream<T> implements IOutputStream<T> {
+public interface ITransactionManager {
 
-    public BucketBackedOutputStream(final IBucket<T> bucket) {
-        super(bucket);
-    }
+    ITransaction beginTransaction() throws TransactionFailedException;
 
-    @Override
-    public void add(final T record) throws BucketException {
-        bucket.makePersistent(record);
-    }
+    ITransaction getTransaction(String id);
+
+    void removeTransaction(ITransaction t);
 }

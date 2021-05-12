@@ -23,9 +23,10 @@ import uk.ac.standrews.cs.storr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.storr.interfaces.*;
 import uk.ac.standrews.cs.storr.util.NeoDbCypherBridge;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static org.neo4j.driver.Values.parameters;
 
@@ -40,10 +41,11 @@ public class Repository implements IRepository {
     private static final String ILLEGAL_CHARS_WINDOWS = "<>:\"/\\|?*";
 
     private static final String ILLEGAL_CHARS = ILLEGAL_CHARS_MAC + ILLEGAL_CHARS_LINUX + ILLEGAL_CHARS_WINDOWS;
-    private static final String LEGAL_CHARS_PATTERN = "[^" + ILLEGAL_CHARS + "]*";
+    public static final String LEGAL_CHARS_PATTERN = "[^" + ILLEGAL_CHARS + "]*";
 
-    private static final String MAKE_BUCKET = "MATCH (r:STORR_REPOSITORY {name: $repo_name}) MERGE (r)-[c:CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) return b";
-    private static final String BUCKET_EXISTS = "MATCH (r:STORR_REPOSITORY {name: $repo_name})-[c:CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) return b";
+    private static final String MAKE_BUCKET_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name}) MERGE (r)-[c:STORR_CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) return b";
+    private static final String BUCKET_EXISTS_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) return b";
+    private static final String DELETE_BUCKET_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) DETACH DELETE b";
 
     private final IStore store;
     private final String repository_name;
@@ -93,7 +95,7 @@ public class Repository implements IRepository {
 
         try ( Session session = bridge.getNewSession() )
         {
-            session.writeTransaction(tx -> tx.run(MAKE_BUCKET, parameters("repo_name", this.repository_name, "bucket_name", bucket_name)));
+            session.writeTransaction(tx -> tx.run(MAKE_BUCKET_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name)));
 
         }
     }
@@ -111,7 +113,7 @@ public class Repository implements IRepository {
     @Override
     public boolean bucketExists(final String bucket_name) {
 
-        Result result = bridge.getNewSession().run(BUCKET_EXISTS,parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
+        Result result = bridge.getNewSession().run(BUCKET_EXISTS_QUERY,parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
         if( result == null ) {
             return false;
         }
@@ -124,21 +126,24 @@ public class Repository implements IRepository {
 
     public long getNeoBucketID(final String bucket_name) throws RepositoryException {
 
-        Result result = bridge.getNewSession().run(BUCKET_EXISTS,parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
+        Result result = bridge.getNewSession().run(BUCKET_EXISTS_QUERY,parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
         if( result == null ) {
-            throw new RepositoryException( "Bucket id not found for:" + bucket_name );
+            throw new RepositoryException( "getNeoBucketID: (1) Bucket id not found for: " + bucket_name );
         }
         List<Node> nodes = result.list(r -> r.get("b").asNode());
         if( nodes.size() != 1 ) {
-            throw new RepositoryException( "Bucket id not found for:" + bucket_name );
+            throw new RepositoryException( "getNeoBucketID: (2) Bucket id not found for: " + bucket_name );
         }
         return nodes.get(0).id();
     }
 
     @Override
-    public void deleteBucket(final String name) throws RepositoryException {
+    public void deleteBucket(final String bucket_name) throws RepositoryException {
 
-            throw new RepositoryException("Cannot delete $$$bucket$$$bucket$$$: " + name); // TODO
+        try( Session session = bridge.getNewSession(); ) {
+            session.writeTransaction(tx -> tx.run(DELETE_BUCKET_QUERY,parameters("repo_name", this.repository_name, "bucket_name", bucket_name)));
+        }
+        bucket_cache.remove(bucket_name);
     }
 
     @Override
@@ -148,7 +153,7 @@ public class Repository implements IRepository {
             final IBucket bucket = bucket_cache.get(bucket_name);
             return bucket != null ? bucket : new NeoBackedBucket(this,bucket_name, getNeoBucketID(bucket_name));
         }
-        throw new RepositoryException("$$$bucket$$$bucket$$$ does not exist: " + bucket_name);
+        throw new RepositoryException("bucket does not exist: " + bucket_name);
     }
 
     @Override
@@ -159,35 +164,30 @@ public class Repository implements IRepository {
             final IBucket bucket = bucket_cache.get(bucket_name);
             return bucket != null ? bucket : new NeoBackedBucket<T>(this,bucket_name, getNeoBucketID(bucket_name));
         }
-        throw new RepositoryException("$$$bucket$$$bucket$$$ does not exist: " + bucket_name);
+        throw new RepositoryException("bucket does not exist: " + bucket_name);
     }
 
     @Override
     public <T extends LXP> IIdtoLXPMap<T> getIdtoLXPMap(String name, Class<T> bucketType) throws RepositoryException {
 
-            return  null; // TODO new IdtoILXPMap( name, this, bucketType, false );
+        return  null; // TODO new 8888 IdtoILXPMap( name, this, bucketType, false );
     }
 
     @Override
     public <T extends LXP> IStringtoILXPMap<T> getStringtoLXPMap(String name, Class<T> bucketType) throws RepositoryException {
 
-            return null; // TODO new StringtoILXPMap( name, this, bucketType, false );
+        return null; // TODO 8888 new StringtoILXPMap( name, this, bucketType, false );
     }
 
     @Override
     public Iterator<String> getBucketNameIterator() {
 
-        throw new RuntimeException("Code commented"); //return new BucketNamesIterator(repository_directory);
+        throw new RuntimeException("Code commented"); //return new BucketNamesIterator(repository_directory);  // TODO 8888
     }
 
     @Override
     public <T extends PersistentObject> Iterator<IBucket<T>> getIterator(Class<T> bucketType) {
-        throw new RuntimeException("Code commented"); //return new BucketIterator(this, repository_directory, bucketType);
-    }
-
-    @Override
-    public Path getRepositoryPath() {
-        throw new RuntimeException("Code commented"); //return repository_path;
+        throw new RuntimeException("Code commented"); //return new BucketIterator(this, repository_directory, bucketType); // TODO 8888
     }
 
     @Override
@@ -202,11 +202,7 @@ public class Repository implements IRepository {
 
     /**
      * Check that the repository name is legal.
-     * A name is legal if:
-     * - it exists and it has at least one character
-     * - it is a valid file name for the file system
      *
-     * TODO - consider limiting the size of the name to 31 characters for better compatability with old file systems?
      * @param name to be checked
      * @return true if the name is legal
      */
@@ -218,52 +214,5 @@ public class Repository implements IRepository {
     public static boolean repositoryNameIsLegal(String name) {
 
         return name.matches(LEGAL_CHARS_PATTERN);
-    }
-
-    private static class BucketNamesIterator implements Iterator<String> {
-
-        private final Iterator<File> file_iterator;
-
-        BucketNamesIterator(final File repo_directory) {
-            file_iterator = new FileIterator(repo_directory, false, true);
-        }
-
-        public boolean hasNext() {
-            return file_iterator.hasNext();
-        }
-
-        @Override
-        public String next() {
-            return file_iterator.next().getName();
-        }
-    }
-
-    private static class BucketIterator<T extends LXP> implements Iterator<IBucket<T>> {
-
-        private final Repository repository;
-        private final Iterator<File> file_iterator;
-        private final Class<T> bucketType;
-
-        BucketIterator(final Repository repository, final File repository_directory, Class<T> bucketType) {
-
-            this.repository = repository;
-            file_iterator = new FileIterator(repository_directory, false, true);
-            this.bucketType = bucketType;
-        }
-
-        public boolean hasNext() {
-            return file_iterator.hasNext();
-        }
-
-        @Override
-        public IBucket<T> next() {
-
-            try {
-                return repository.getBucket(file_iterator.next().getName(), bucketType);
-
-            } catch (RepositoryException e) {
-                throw new NoSuchElementException(e.getMessage());
-            }
-        }
     }
 }

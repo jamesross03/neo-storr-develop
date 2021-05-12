@@ -21,6 +21,8 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.types.Node;
 import uk.ac.standrews.cs.storr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.storr.impl.exceptions.StoreException;
+import uk.ac.standrews.cs.storr.impl.transaction.impl.TransactionManager;
+import uk.ac.standrews.cs.storr.impl.transaction.interfaces.ITransactionManager;
 import uk.ac.standrews.cs.storr.interfaces.IRepository;
 import uk.ac.standrews.cs.storr.interfaces.IStore;
 import uk.ac.standrews.cs.storr.util.NeoDbCypherBridge;
@@ -39,6 +41,7 @@ import static uk.ac.standrews.cs.storr.impl.Repository.repositoryNameIsLegal;
 public class Store implements IStore {
 
     private static Store instance;
+    private ITransactionManager transaction_manager;
     private final TypeFactory type_factory;
     private final Map<String, IRepository> repository_cache;
 
@@ -48,8 +51,12 @@ public class Store implements IStore {
 
     private final NeoDbCypherBridge bridge;
 
-    private static final String CREATE_REPO = "MERGE (a:STORR_REPOSITORY {name: $name})";
-    private static final String REPO_EXISTS = "MATCH (r:STORR_REPOSITORY {name: $name}) return r";
+    private static final String CREATE_REPO_QUERY = "MERGE (a:STORR_REPOSITORY {name: $name})";
+    private static final String REPO_EXISTS_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name}) return r";
+    private static final String DELETE_REPO_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET) DETACH DELETE r,b";
+
+    // fully recursive: "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET)-[l:STORR_MEMBER]-(o) DETACH DELETE r,b,o";
+
 
     public Store() throws StoreException {
 
@@ -59,6 +66,7 @@ public class Store implements IStore {
             bridge = new NeoDbCypherBridge();
             repository_cache = new HashMap<>();
 
+            transaction_manager = new TransactionManager(this);
             type_factory = new TypeFactory(this);
 
         } catch ( RepositoryException e) {
@@ -68,6 +76,11 @@ public class Store implements IStore {
 
     public synchronized static IStore getInstance() {
         return instance;
+    }
+
+    @Override
+    public ITransactionManager getTransactionManager() {
+        return transaction_manager;
     }
 
     @Override
@@ -89,7 +102,7 @@ public class Store implements IStore {
 
     @Override
     public boolean repositoryExists(String name) {
-        Result result = bridge.getNewSession().run(REPO_EXISTS,parameters("name", name));
+        Result result = bridge.getNewSession().run(REPO_EXISTS_QUERY,parameters("name", name));
         List<Node> nodes = result.list(r -> r.get("r").asNode());
         if( nodes.size() == 0 ) {
             return false;
@@ -98,9 +111,15 @@ public class Store implements IStore {
     }
 
     @Override
-    public void deleteRepository(String name) throws RepositoryException {
-        if (!repositoryExists(name)) {
-            throw new RepositoryException("Bucket with " + name + "does not exist");
+    public void deleteRepository(String repository_name) throws RepositoryException {
+        if (!repositoryExists(repository_name)) {
+            throw new RepositoryException("Bucket with " + repository_name + "does not exist");
+        }
+
+        repository_cache.remove(repository_name);
+
+        try( Session session = bridge.getNewSession(); ) {
+            session.writeTransaction(tx -> tx.run(DELETE_REPO_QUERY,parameters("name", repository_name)));
         }
 
     }
@@ -139,7 +158,7 @@ public class Store implements IStore {
 
         try ( Session session = bridge.getNewSession() )
         {
-            session.writeTransaction(tx -> tx.run(CREATE_REPO, parameters("name", name)));
+            session.writeTransaction(tx -> tx.run(CREATE_REPO_QUERY, parameters("name", name)));
         }
     }
 }

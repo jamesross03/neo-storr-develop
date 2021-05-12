@@ -426,6 +426,7 @@ public abstract class LXP extends PersistentObject {
         }
     }
 
+    @Override
     public Map<String,Object> serializeFieldsToMap()  {
 
         Map<String,Object> map = new HashMap<>();
@@ -509,37 +510,22 @@ public abstract class LXP extends PersistentObject {
         put(key, list);
     }
 
-    void readJSON(final JSONReader reader, final boolean isObject) throws JSONException, PersistentObjectException {
+    void intialise_properties( Map<String,Object> properties ) throws JSONException, PersistentObjectException {
 
-        try {
-            reader.nextSymbol();
-            if (isObject) reader.object();
+        final Map<String, Integer> field_name_to_slot = getMetaData().getFieldNamesToSlotNumbers();
 
-            final Map<String, Integer> field_name_to_slot = getMetaData().getFieldNamesToSlotNumbers();
+        for( Map.Entry<String, Object> entry : properties.entrySet()) {
 
-            while (!reader.isEndOfStream()) {
+            final String key = entry.getKey(); // keep the keys identical whenever possible.
+            final Object value = entry.getValue();
 
-                final String key = reader.key().intern(); // keep the keys identical whenever possible.
-                final Object value = readValue(reader);
+            if (value != null) {
+                check(key);
+                put(field_name_to_slot.get(key), value);
 
-                if (value != null) {
-                    check(key);
-                    put(field_name_to_slot.get(key), value);
-
-                } else if (reader.have(JSONReader.ARRAY)) {
-                    readArray(reader, key);
-
-                } else {
-                    throw new PersistentObjectException("No matching value for the key " + key);
-                }
+            } else {
+                throw new PersistentObjectException("No matching value for the key " + key);
             }
-        } catch (final JSONException | BucketException e) {
-
-            if (reader.have(JSONReader.ENDOBJECT)) { // we are at the end and that is OK
-                return;
-            }
-            // otherwise bad stuff has happened
-            throw new PersistentObjectException(e);
         }
     }
 }

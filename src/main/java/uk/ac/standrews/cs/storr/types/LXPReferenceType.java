@@ -19,15 +19,12 @@ package uk.ac.standrews.cs.storr.types;
 import uk.ac.standrews.cs.storr.impl.DynamicLXP;
 import uk.ac.standrews.cs.storr.impl.LXP;
 import uk.ac.standrews.cs.storr.impl.LXPReference;
-import uk.ac.standrews.cs.storr.impl.exceptions.*;
+import uk.ac.standrews.cs.storr.impl.exceptions.BucketException;
+import uk.ac.standrews.cs.storr.impl.exceptions.KeyNotFoundException;
+import uk.ac.standrews.cs.storr.impl.exceptions.ReferenceException;
+import uk.ac.standrews.cs.storr.impl.exceptions.TypeMismatchFoundException;
 import uk.ac.standrews.cs.storr.interfaces.*;
-import uk.ac.standrews.cs.utilities.FileManipulation;
-import uk.ac.standrews.cs.utilities.JSONReader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
@@ -40,13 +37,14 @@ public class LXPReferenceType implements IReferenceType {
 
     public LXPReferenceType(String json_encoded_type_descriptor_file_name, IRepository repo, IBucket bucket) {
 
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(json_encoded_type_descriptor_file_name), FileManipulation.FILE_CHARSET)) {
-
-            typerep = new DynamicLXP(new JSONReader(reader), bucket);
-
-        } catch (PersistentObjectException | IOException | IllegalKeyException e) {
-            throw new ReferenceException("Error creating LXPReference", e);
-        }
+//        try (BufferedReader reader = Files.newBufferedReader(Paths.get(json_encoded_type_descriptor_file_name), FileManipulation.FILE_CHARSET)) {
+//
+//            typerep = new DynamicLXP(new JSONReader(reader), bucket);
+//
+//        } catch (PersistentObjectException | IOException | IllegalKeyException e) {
+//            throw new ReferenceException("Error creating LXPReference", e);
+//        }
+        throw new ReferenceException("Error creating LXPReference 8888", null); // TODO 8888
     }
 
     public LXPReferenceType(DynamicLXP typerep) {

@@ -19,42 +19,49 @@ package uk.ac.standrews.cs.storr.impl;
 import org.junit.Test;
 import uk.ac.standrews.cs.storr.impl.exceptions.RepositoryException;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
+import static uk.ac.standrews.cs.storr.impl.Repository.bucketNameIsLegal;
+
 /**
  * @author Simone I. Conte "sic2@st-andrews.ac.uk"
  */
 public class RepositoryTest extends CommonTest {
 
-//    private static final String GENERIC_BUCKET_NAME = "BUCKET1";
-//    private static final List<String> LEGAL_NAMES = Arrays.asList("$$$bucket$$$bucket$$$", "a $$$bucket$$$bucket$$$");
-//    private static final List<String> ILLEGAL_NAMES = Arrays.asList("a: $$$bucket$$$bucket$$$","a/$$$bucket$$$bucket$$$","a<$$$bucket$$$bucket$$$","a\\$$$bucket$$$bucket$$$?");
+    private static final String GENERIC_BUCKET_NAME = "BUCKET1";
+    private static final List<String> LEGAL_NAMES = Arrays.asList("bucket", "a bucket");
+    private static final List<String> ILLEGAL_NAMES = Arrays.asList("a: bucket","a/bucket","a<bucket","a\\bucket?");
+
+    @Test
+    public void checkRepoExistsTest() throws RepositoryException {
+
+        assertTrue(store.repositoryExists(REPOSITORY_NAME));
+    }
 
     @Test
     public void createBucketTest() throws RepositoryException {
 
-//        repository.makeBucket(GENERIC_BUCKET_NAME, BucketKind.DIRECTORYBACKED);
-//
-//        assertTrue(repository.bucketExists(GENERIC_BUCKET_NAME));
-//        assertEquals(GENERIC_BUCKET_NAME, repository.getBucket(GENERIC_BUCKET_NAME).getName());
+        repository.makeBucket(GENERIC_BUCKET_NAME);
+
+        assertTrue(repository.bucketExists(GENERIC_BUCKET_NAME));
+        assertEquals(GENERIC_BUCKET_NAME, repository.getBucket(GENERIC_BUCKET_NAME).getName());
+
+        repository.deleteBucket(GENERIC_BUCKET_NAME);
+
+        assertFalse(repository.bucketExists(GENERIC_BUCKET_NAME));
     }
 
-//    @Test
-//    public void deleteBucketTest() throws RepositoryException {
-//
-//        repository.makeBucket(GENERIC_BUCKET_NAME, BucketKind.DIRECTORYBACKED);
-//        repository.deleteBucket(GENERIC_BUCKET_NAME);
-//
-//        assertFalse(repository.bucketExists(GENERIC_BUCKET_NAME));
-//    }
-//
-//    @Test
-//    public void nameLegalityTest() {
-//
-//        for (String name : LEGAL_NAMES) {
-//            assertTrue(bucketNameIsLegal(name));
-//        }
-//
-//        for (String name : ILLEGAL_NAMES) {
-//            assertFalse(bucketNameIsLegal(name));
-//        }
-//    }
+    @Test
+    public void nameLegalityTest() {
+
+        for (String name : LEGAL_NAMES) {
+            assertTrue(bucketNameIsLegal(name));
+        }
+
+        for (String name : ILLEGAL_NAMES) {
+            assertFalse(bucketNameIsLegal(name));
+        }
+    }
 }

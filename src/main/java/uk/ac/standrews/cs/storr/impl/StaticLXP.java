@@ -41,14 +41,13 @@ public abstract class StaticLXP extends LXP {
         super( object_id, bucket);
     }
 
-    public StaticLXP(final long persistent_object_id, final JSONReader reader, final IBucket bucket) throws PersistentObjectException {
+    public StaticLXP(final long persistent_object_id, Map<String,Object> properties, final IBucket bucket) throws PersistentObjectException {
         super( persistent_object_id, bucket );
-        readJSON(reader, true);
-
+        intialise_properties( properties );
     }
 
     public StaticLXP(final JSONReader reader, final IBucket bucket) throws PersistentObjectException {
-        throw new RuntimeException("Code commented"); // this(getNextFreePID(), reader, bucket);
+        throw new RuntimeException("Code commented 8888"); // this(getNextFreePID(), reader, bucket); // TODO Unused? 8888
     }
 
     @Override

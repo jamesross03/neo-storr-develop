@@ -20,7 +20,6 @@ import org.json.JSONWriter;
 import uk.ac.standrews.cs.storr.impl.exceptions.IllegalKeyException;
 import uk.ac.standrews.cs.storr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.storr.interfaces.IBucket;
-import uk.ac.standrews.cs.utilities.JSONReader;
 
 import java.io.StringWriter;
 import java.util.Map;
@@ -41,13 +40,9 @@ public class DynamicLXP extends LXP {
         super(object_id, bucket);
     }
 
-    public DynamicLXP(final long persistent_object_id, final JSONReader reader, final IBucket bucket) throws PersistentObjectException {
+    public DynamicLXP(final long persistent_object_id, Map<String,Object> properties, final IBucket bucket) throws PersistentObjectException {
         this(persistent_object_id, bucket);
-        readJSON(reader, true);
-    }
-
-    public DynamicLXP(final JSONReader reader, final IBucket bucket) throws PersistentObjectException {
-        throw new RuntimeException("Code commented"); //this(getNextFreePID(), reader, bucket);
+        intialise_properties( properties );
     }
 
     @Override

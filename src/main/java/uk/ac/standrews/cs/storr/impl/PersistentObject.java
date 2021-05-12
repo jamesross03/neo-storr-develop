@@ -23,6 +23,7 @@ import uk.ac.standrews.cs.storr.interfaces.IBucket;
 import uk.ac.standrews.cs.storr.interfaces.IStoreReference;
 
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -66,6 +67,8 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
     }
 
     public abstract void serializeToJSON(JSONWriter writer) throws JSONException;
+
+    public abstract Map<String,Object> serializeFieldsToMap();
 
     /**
      * @return the metadata associated with the class extending LXP base.

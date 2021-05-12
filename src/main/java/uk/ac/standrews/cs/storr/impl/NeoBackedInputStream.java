@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class BucketBackedInputStream<T extends PersistentObject> implements IInputStream<T> {
+public class NeoBackedInputStream<T extends PersistentObject> implements IInputStream<T> {
 
     private final IBucket<T> bucket;
 
-    BucketBackedInputStream(final IBucket<T> bucket) throws IOException {
+    NeoBackedInputStream(final IBucket<T> bucket) throws IOException {
 
         this.bucket = bucket;
     }
@@ -37,7 +37,7 @@ public class BucketBackedInputStream<T extends PersistentObject> implements IInp
 
         return new Iterator<T>() {
 
-            private Iterator<Long> oid_iterator = bucket.getOids().iterator();  //TODO Maybe slow????
+            private Iterator<Long> oid_iterator = bucket.getOids().iterator();
 
             @Override
             public boolean hasNext() {
