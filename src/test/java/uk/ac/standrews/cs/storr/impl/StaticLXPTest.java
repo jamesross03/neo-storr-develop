@@ -52,13 +52,6 @@ public class StaticLXPTest extends CommonTest {
         b = repository.makeBucket(generic_bucket_name1);
     }
 
-
-    public void tearDown() throws BucketException {
-//        System.out.println( "Als id = " + al.getId() );
-//        b.delete( al_id );
-//        assertFalse( b.contains( al_id ) );
-    }
-
     @Test
     public synchronized void testStaticLXPCreation() throws RepositoryException, IllegalKeyException, BucketException {
         al = new Birth();

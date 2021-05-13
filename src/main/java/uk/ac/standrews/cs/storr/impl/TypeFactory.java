@@ -54,7 +54,7 @@ public class TypeFactory {
         final boolean type_repo_initialised_already = type_repository.bucketExists(type_Rep_bucket_name);
         type_reps_bucket = getBucket(type_Rep_bucket_name);
         type_name_bucket = getBucket(type_names_bucket_name);
-        // loadCaches(); // TODO COMMENTED OUT BY AL 8888 **********************
+        loadCaches();
 
         if (!type_repo_initialised_already) {
             // initialise predefined types - only 1 for now
