@@ -24,15 +24,9 @@ public class Birth extends StaticLXP {
         super( persistent_object_id, properties, bucket );
     }
 
-
     public Birth(String forename, String surname ) {
         this.put( Birth.FORENAME, forename );
         this.put( Birth.SURNAME, surname );
-    }
-
-    @Override
-    public LXPMetadata getMetaData() {
-            return static_metadata;
     }
 
     public static LXPReference<Birth> makeRef( String serialized ) {
@@ -41,6 +35,11 @@ public class Birth extends StaticLXP {
 
     public static Birth getRef( LXPReference<Birth> ref ) throws BucketException, RepositoryException {
         return (Birth) ref.getReferend(Birth.class);
+    }
+
+    @Override
+    public LXPMetadata getMetaData() {
+        return static_metadata;
     }
 
     static {
