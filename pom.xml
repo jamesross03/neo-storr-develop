@@ -21,10 +21,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.stacs-srg</groupId>
+        <groupId>uk.ac.standrews.cs</groupId>
         <artifactId>common-pom</artifactId>
-        <version>1.0.1</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
+
+    <properties>
+
+        <maven.repository.host>maven-host.cs.st-andrews.ac.uk</maven.repository.host>
+        <maven.repository.path>/cs/unique/cs-maven-repository/</maven.repository.path>
+        <maven.repository.user>maven-repo</maven.repository.user>
+
+    </properties>
 
 
     <groupId>uk.ac.standrews.cs</groupId>
