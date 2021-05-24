@@ -49,7 +49,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
     private static final String TYPE_LABEL_FILE_NAME = "TYPELABEL";
 
     public static final String LXP_EXISTS = "MATCH (o:STORR_LXP { STORR_ID:$id } ) RETURN o";
-    private static final String CREATE_LXP_QUERY = "CREATE (n:STORR_LXP $props) RETURN n";
+    private static final String CREATE_LXP_QUERY ="CREATE (n:STORR_LXP $props) RETURN n";
     private static final String ADD_LXP_TO_BUCKET_QUERY = "MATCH(b:STORR_BUCKET),(l:STORR_LXP) WHERE id(b)=$bucket_id AND id(l)=$new_id CREATE (b)-[r:STORR_MEMBER]->(l)";
     private static final String GET_LXPS_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id RETURN l";
     private static final String GET_LXP_BY_STORR_ID_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id AND l.STORR_ID=$storr_id RETURN l";
@@ -256,6 +256,8 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         return bucketType;
     }
 
+    public long getNeoId() { return neo_id; }
+
     public boolean contains(final long storr_id) {
         Result result = bridge.getNewSession().run(LXP_EXISTS, parameters("id", storr_id));
         if (result == null) {
@@ -424,10 +426,16 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         record_to_write.$$$bucket$$$bucket$$$ = this;
         Map<String, Object> props = record_to_write.serializeFieldsToMap();
         props.put( "STORR_ID", record_to_write.getId());
+        Class java_class = record_to_write.getMetaData().metadata_class;
 
         try (Session session = bridge.getNewSession(); Transaction tx = session.beginTransaction();) {
 
-            Result result = tx.run(CREATE_LXP_QUERY, parameters("props", props));
+            Result result;
+            if( java_class != null ) {
+                result = tx.run(build_parameterised_query( java_class ), parameters("props", props));
+            } else{
+                result = tx.run(CREATE_LXP_QUERY, parameters("props", props));
+            }
 
             List<Node> nodes = result.list(r -> r.get("n").asNode());
             if( nodes.size() != 1 ) {
@@ -440,6 +448,11 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         } catch (RepositoryException e) {
             e.printStackTrace();
         }
+    }
+
+    private String build_parameterised_query(Class clazz) {
+        String name = clazz.getSimpleName();
+        return "CREATE (n:STORR_LXP:" + name + " $props) RETURN n";
     }
 
 
@@ -476,5 +489,4 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         }
         object_cache.invalidate(oid);
     }
-
 }

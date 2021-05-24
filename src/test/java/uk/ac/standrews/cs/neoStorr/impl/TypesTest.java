@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
 public class TypesTest extends CommonTest {
 
     private static String generic_bucket_name1 = Double.toString( new Random().nextDouble() );
-    private IBucket<Birth> b;
+    private IBucket<BBB> b;
 
     @Before
     public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
@@ -48,7 +48,7 @@ public class TypesTest extends CommonTest {
             System.out.println( "Bucket: " + generic_bucket_name1 + " did not exist before test - that is ok.");
         }
 
-        b = repository.makeBucket(generic_bucket_name1,Birth.class);
+        b = repository.makeBucket(generic_bucket_name1, BBB.class);
     }
 
 
@@ -57,7 +57,7 @@ public class TypesTest extends CommonTest {
 
         Class c = b.getBucketType();
 
-        assertEquals( c, Birth.class );
+        assertEquals( c, BBB.class );
     }
 
     @Test
@@ -73,9 +73,9 @@ public class TypesTest extends CommonTest {
         for( LXP type_name : name_stream ) {
             // everything in type names should be LXPs containing an id and name field
             String name_field = (String) type_name.get( "name" );
-            if( name_field.equals( "Birth" ) ) {
+            if( name_field.equals( "BBB" ) ) {
                 if( found ) {
-                    fail( "Found the type name Birth twice (or more...)");
+                    fail( "Found the type name BBB twice (or more...)");
                 }
                 found = true;
             }
@@ -95,7 +95,7 @@ public class TypesTest extends CommonTest {
         for( LXP type_name : name_stream ) {
             // everything in type names shpould be LXPs containing an id and name field
             String name_field = (String) type_name.get( "name" );
-            if( name_field.equals( "Birth" ) ) {
+            if( name_field.equals( "BBB" ) ) {
                 long rep_id = (Long) type_name.get( "key" );
                 assertTrue( type_reps.contains(rep_id) );
                 LXP type_rep = (LXP) type_reps.getObjectById(rep_id);

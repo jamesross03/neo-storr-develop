@@ -33,7 +33,7 @@ public class StoreInegrityTest extends CommonTest {
 
     private static String generic_bucket_name1 = "BUCKET1";
     private IBucket b;
-    private Birth al;
+    private BBB al;
     private long al_id;
 
     @Before

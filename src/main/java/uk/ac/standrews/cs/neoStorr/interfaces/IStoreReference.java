@@ -16,6 +16,7 @@
  */
 package uk.ac.standrews.cs.neoStorr.interfaces;
 
+import uk.ac.standrews.cs.neoStorr.impl.LXP;
 import uk.ac.standrews.cs.neoStorr.impl.PersistentObject;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
@@ -32,4 +33,6 @@ public interface IStoreReference<T extends PersistentObject> {
     Long getOid();
 
     T getReferend(Class clazz) throws BucketException, RepositoryException;
+
+    LXP getReferend() throws RepositoryException, BucketException;
 }

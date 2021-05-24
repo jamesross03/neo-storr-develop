@@ -34,8 +34,8 @@ import static org.junit.Assert.*;
 public class StaticLXPTest extends CommonTest {
 
     private static String births_bucket_name = "Births";
-    private IBucket<Birth> b;
-    private Birth al;
+    private IBucket<BBB> b;
+    private BBB al;
     private long al_id;
 
     @Before
@@ -45,21 +45,21 @@ public class StaticLXPTest extends CommonTest {
         super.setUp();
 
         try {
-            b = repository.getBucket(births_bucket_name, Birth.class);
+            b = repository.getBucket(births_bucket_name, BBB.class);
             System.out.println( "Got bucket: " + births_bucket_name);
         } catch (RepositoryException e) {
             System.out.println( "Got exception getting bucket: " + e.getMessage() );
             System.out.println( "Trying to create bucket: " + births_bucket_name);
-            b = repository.makeBucket(births_bucket_name, Birth.class);
+            b = repository.makeBucket(births_bucket_name, BBB.class);
             System.out.println( "Bucket: " + births_bucket_name + " created" );
         }
     }
 
     @Test
     public synchronized void testStaticLXPCreation() throws BucketException {
-        al = new Birth();
-        al.put( Birth.FORENAME,"Al" );
-        al.put( Birth.SURNAME,"Dearle" );
+        al = new BBB();
+        al.put( BBB.FORENAME,"Al" );
+        al.put( BBB.SURNAME,"Dearle" );
         b.makePersistent( al );
         al_id = al.getId();
         assertTrue( b.contains( al_id ) );
@@ -67,9 +67,9 @@ public class StaticLXPTest extends CommonTest {
 
     @Test
     public synchronized void testStaticLXPCreateDelete() throws BucketException {
-        al = new Birth();
-        al.put( Birth.FORENAME,"Al" );
-        al.put( Birth.SURNAME,"Dearle" );
+        al = new BBB();
+        al.put( BBB.FORENAME,"Al" );
+        al.put( BBB.SURNAME,"Dearle" );
         b.makePersistent( al );
         al_id = al.getId();
         assertTrue( b.contains( al_id ) );
@@ -80,38 +80,38 @@ public class StaticLXPTest extends CommonTest {
     @Test
     public synchronized void testStaticUpdate() throws RepositoryException, IllegalKeyException, BucketException, TransactionFailedException {
 
-        al = new Birth();
-        al.put( Birth.FORENAME,"Al" );
-        al.put( Birth.SURNAME,"Dearle" );
+        al = new BBB();
+        al.put( BBB.FORENAME,"Al" );
+        al.put( BBB.SURNAME,"Dearle" );
         b.makePersistent( al );
         al_id = al.getId();
 
         ITransaction t = store.getTransactionManager().beginTransaction();
-        al.put( Birth.FORENAME,"Alan");
+        al.put( BBB.FORENAME,"Alan");
         b.update(al);
         t.commit();
-        assertEquals( al.get(Birth.FORENAME),"Alan" );
+        assertEquals( al.get(BBB.FORENAME),"Alan" );
         //---------
         ITransaction t2 = store.getTransactionManager().beginTransaction();
-        al.put( Birth.FORENAME,"Al");
+        al.put( BBB.FORENAME,"Al");
         b.update(al);
         t2.commit();
-        assertEquals( al.get(Birth.FORENAME),"Al" );
+        assertEquals( al.get(BBB.FORENAME),"Al" );
     }
 
     @Test
     public synchronized void testStaticAbort() throws RepositoryException, IllegalKeyException, BucketException, TransactionFailedException {
 
-        al = new Birth();
-        al.put( Birth.FORENAME,"Al" );
-        al.put( Birth.SURNAME,"Dearle" );
+        al = new BBB();
+        al.put( BBB.FORENAME,"Al" );
+        al.put( BBB.SURNAME,"Dearle" );
         b.makePersistent( al );
 
         ITransaction t = store.getTransactionManager().beginTransaction();
-        al.put( Birth.FORENAME,"Graham");
+        al.put( BBB.FORENAME,"Graham");
         b.update(al);
         t.rollback();
-        assertEquals( al.get(Birth.FORENAME),"Al" );
+        assertEquals( al.get(BBB.FORENAME),"Al" );
     }
 
 

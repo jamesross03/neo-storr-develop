@@ -537,7 +537,7 @@ public abstract class LXP extends PersistentObject {
         for( Map.Entry<String, Object> entry : properties.entrySet()) {
 
             final String key = entry.getKey(); // keep the keys identical whenever possible.
-            if(! key.equals( "STORR_ID") ) { // these are not for public consumption - used in Neo to store storr id
+            if( ! key.equals( "STORR_ID") ) { // these are not for public consumption - used in Neo to store storr id
                 final Object value = entry.getValue();
 
                 if (value != null) {

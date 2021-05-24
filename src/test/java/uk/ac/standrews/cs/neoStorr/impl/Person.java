@@ -16,37 +16,62 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
+
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
-import uk.ac.standrews.cs.neoStorr.types.LXP_REF;
+import uk.ac.standrews.cs.neoStorr.types.JPO_FIELD;
 
 import java.util.Map;
+import java.util.Objects;
 
-public class AClassContainingBirthRef extends StaticLXP {
+public class Person extends JPO {
 
-    private static LXPMetadata static_metadata;
+    @JPO_FIELD
+    private int age;
 
-    @LXP_REF(type = "Birth")
-    public static int MY_FIELD;
+    @JPO_FIELD
+    public String address;
 
-    public AClassContainingBirthRef() {}
-
-    public AClassContainingBirthRef(Birth b) throws PersistentObjectException {
-        this.put(AClassContainingBirthRef.MY_FIELD, b.getThisRef() );
+    public Person() { // requirement for JPO
     }
 
-    public AClassContainingBirthRef(long persistent_object_id, Map properties, IBucket bucket ) throws PersistentObjectException {
-        super( persistent_object_id, properties, bucket );
+    public Person(long id, Map map, IBucket bucket ) throws PersistentObjectException { // a requirement for JPO
+        super(id, map, bucket);
+    }
+
+    public Person(int age, String address) {
+        this.age = age;
+        this.address = address;
     }
 
     @Override
-    public LXPMetadata getMetaData() {
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final Person person = (Person) o;
+        return age == person.age &&
+                Objects.equals(address, person.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(age, address);
+    }
+
+    /* Storr stuff */
+
+    private static final JPOMetadata static_metadata;
+
+    @Override
+    public JPOMetadata getJPOMetaData() {
         return static_metadata;
     }
 
+
+
     static {
         try {
-            static_metadata = new LXPMetadata(AClassContainingBirthRef.class, "AClassContainingBirthRef");
+            static_metadata = new JPOMetadata(Person.class,"JPOPerson");
         } catch (Exception var1) {
             throw new RuntimeException(var1);
         }

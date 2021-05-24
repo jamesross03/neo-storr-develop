@@ -38,9 +38,9 @@ public class ONLYRUNAFTERRefTest extends CommonTest {
     private static String generic_bucket_name1 = "BUCKET1";
     private static String births_bucket_name = "Births_ref_test";
     private static String static_lxp_bucket_name = "StaticLXPBucket";
-    private IBucket<Birth> b;
+    private IBucket<BBB> b;
     private IBucket d;
-    private IBucket<AClassContainingBirthRef> e;
+    private IBucket<AClassContainingBBBRef> e;
 
     @Before
     public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
@@ -49,9 +49,9 @@ public class ONLYRUNAFTERRefTest extends CommonTest {
 
         System.out.println( "This test uses existing buckets if they exist and doesn't clean up!");
         try {
-            b = repository.getBucket(births_bucket_name,Birth.class);
+            b = repository.getBucket(births_bucket_name, BBB.class);
         } catch( RepositoryException e ) {
-            b = repository.makeBucket(births_bucket_name,Birth.class);
+            b = repository.makeBucket(births_bucket_name, BBB.class);
         }
         try {
             d = repository.getBucket(generic_bucket_name1);
@@ -59,25 +59,25 @@ public class ONLYRUNAFTERRefTest extends CommonTest {
             d = repository.makeBucket(generic_bucket_name1);
         }
         try {
-            e = repository.getBucket(static_lxp_bucket_name, AClassContainingBirthRef.class);
+            e = repository.getBucket(static_lxp_bucket_name, AClassContainingBBBRef.class);
         } catch( RepositoryException ex ) {
-            e = repository.makeBucket(static_lxp_bucket_name, AClassContainingBirthRef.class);
+            e = repository.makeBucket(static_lxp_bucket_name, AClassContainingBBBRef.class);
         }
     }
 
     @Test
     public synchronized void testStaticLXPObjectWithRef() throws RepositoryException, IllegalKeyException, BucketException, TransactionFailedException, PersistentObjectException {
 
-        IInputStream<AClassContainingBirthRef> stream = e.getInputStream();
+        IInputStream<AClassContainingBBBRef> stream = e.getInputStream();
 
-        for( AClassContainingBirthRef lxpwr : stream ) {
+        for( AClassContainingBBBRef lxpwr : stream ) {
 
             // There is only one if run after RefTest
 
-            System.out.println( "Id of AClassContainingBirthRef  is : " + lxpwr.getId() );
-            IStoreReference<Birth> ref = lxpwr.getRef(AClassContainingBirthRef.MY_FIELD);
-            Birth returned = Birth.getRef((LXPReference)ref);  // ref.getReferend();
-            assertEquals( returned.get( Birth.FORENAME ),"Graham" );
+            System.out.println( "Id of AClassContainingBBBRef  is : " + lxpwr.getId() );
+            IStoreReference<BBB> ref = lxpwr.getRef(AClassContainingBBBRef.MY_FIELD);
+            BBB returned = BBB.getRef((LXPReference)ref);  // ref.getReferend();
+            assertEquals( returned.get( BBB.FORENAME ),"Graham" );
 
 
         }

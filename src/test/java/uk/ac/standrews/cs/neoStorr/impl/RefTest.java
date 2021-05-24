@@ -36,9 +36,9 @@ public class RefTest extends CommonTest {
     private static String generic_bucket_name1 = "BUCKET1";
     private static String births_bucket_name = "Births_ref_test";
     private static String static_lxp_bucket_name = "StaticLXPBucket";
-    private IBucket<Birth> b;
+    private IBucket<BBB> b;
     private IBucket d;
-    private IBucket<AClassContainingBirthRef> e;
+    private IBucket<AClassContainingBBBRef> e;
 
     @Before
     public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
@@ -47,9 +47,9 @@ public class RefTest extends CommonTest {
 
         System.out.println( "This test uses existing buckets if they exist and doesn't clean up!");
         try {
-            b = repository.getBucket(births_bucket_name,Birth.class);
+            b = repository.getBucket(births_bucket_name, BBB.class);
         } catch( RepositoryException e ) {
-            b = repository.makeBucket(births_bucket_name,Birth.class);
+            b = repository.makeBucket(births_bucket_name, BBB.class);
         }
         try {
             d = repository.getBucket(generic_bucket_name1);
@@ -57,9 +57,9 @@ public class RefTest extends CommonTest {
             d = repository.makeBucket(generic_bucket_name1);
         }
         try {
-            e = repository.getBucket(static_lxp_bucket_name, AClassContainingBirthRef.class);
+            e = repository.getBucket(static_lxp_bucket_name, AClassContainingBBBRef.class);
         } catch( RepositoryException ex ) {
-            e = repository.makeBucket(static_lxp_bucket_name, AClassContainingBirthRef.class);
+            e = repository.makeBucket(static_lxp_bucket_name, AClassContainingBBBRef.class);
         }
     }
 
@@ -67,7 +67,7 @@ public class RefTest extends CommonTest {
     @Test
     public synchronized void testCreateDynamicLXPWithRef() throws RepositoryException, IllegalKeyException, BucketException, TransactionFailedException, PersistentObjectException {
 
-        Birth al = new Birth("Al", "Dearle");
+        BBB al = new BBB("Al", "Dearle");
         b.makePersistent( al );
         long al_id = al.getId();
 
@@ -84,15 +84,15 @@ public class RefTest extends CommonTest {
     @Test
     public synchronized void testCreateStaticLXPObjectWithRef() throws RepositoryException, IllegalKeyException, BucketException, TransactionFailedException, PersistentObjectException {
 
-        Birth graham = new Birth("Graham", "Dearle");
+        BBB graham = new BBB("Graham", "Dearle");
         b.makePersistent( graham );
         long graham_id = graham.getId();
 
-        AClassContainingBirthRef slwr = new AClassContainingBirthRef(graham);
+        AClassContainingBBBRef slwr = new AClassContainingBBBRef(graham);
         long slwr_id = slwr.getId();
 
         e.makePersistent(slwr);
-        System.out.println( "ID OF AClassContainingBirthRef IS: " + slwr_id );
+        System.out.println( "ID OF AClassContainingBBBRef IS: " + slwr_id );
 
         assertTrue( b.contains(graham_id));
         assertTrue( e.contains(slwr_id));

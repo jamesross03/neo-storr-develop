@@ -50,10 +50,6 @@ public interface IRepository {
      */
     <T extends LXP> IBucket<T> makeBucket(final String name, Class<T> bucketType) throws RepositoryException, IOException;
 
-    <T extends LXP> IIdtoLXPMap<T> makeIdtoLXPMap(final String name, Class<T> bucketType ) throws RepositoryException;
-
-    <T extends LXP> IStringtoILXPMap<T> makeStringtoLXPMap(final String name, Class<T> bucketType ) throws RepositoryException;
-
     /**
      * @param name - the bucket that is the subject of the enquiry.
      * @return true if a bucket with the given name exists in the repo.
@@ -83,24 +79,6 @@ public interface IRepository {
      * @throws RepositoryException if the bucket does not exist or if something goes wrong.
      */
     <T extends LXP> IBucket<T> getBucket(final String name, Class<T> bucketType) throws RepositoryException;
-
-    /**
-     * @param name the name of the field_storage being looked up
-     * @param <T> the type of the domain of the field_storage
-     * @param bucketType - a class capable of creating instances of type @class T
-     * @return the field_storage with the given name, iof it exists and is type compatible.
-     * @throws RepositoryException if the field_storage does not exist or if something goes wrong.
-     */
-    <T extends LXP> IIdtoLXPMap<T> getIdtoLXPMap(final String name, Class<T> bucketType ) throws RepositoryException;
-
-    /**
-     * @param name the name of the field_storage being looked up
-     * @param <T> the type of the domain of the field_storage
-     * @param bucketType - a class capable of creating instances of type @class T
-     * @return the field_storage with the given name, iof it exists and is type compatible.
-     * @throws RepositoryException if the bucket does not exist or if something goes wrong.
-     */
-    <T extends LXP> IStringtoILXPMap<T> getStringtoLXPMap(final String name, Class<T> bucketType ) throws RepositoryException;
 
     /**
      * @return the names of all the buckets in the repo

@@ -51,7 +51,7 @@ public class Repository implements IRepository {
     private final IStore store;
     private final String repository_name;
 
-    private final Map<String, IBucket> bucket_cache;
+    private final Map<String, NeoBackedBucket> bucket_cache;
     private final NeoDbCypherBridge bridge;
 
     Repository(IStore store, String repository_name) throws RepositoryException {
@@ -63,23 +63,23 @@ public class Repository implements IRepository {
         this.store = store;
         this.bridge = store.getBridge();
         this.repository_name = repository_name;
-        bucket_cache = new HashMap<String, IBucket>();
+        bucket_cache = new HashMap<String, NeoBackedBucket>();
     }
 
     @Override
     public IBucket makeBucket(final String bucket_name) throws RepositoryException {
 
-            makeBucketInNeo(bucket_name); // Throws exception if it already exists in Db
-            IBucket bucket = new NeoBackedBucket(this, bucket_name, getNeoBucketID(bucket_name));
-            bucket_cache.put(bucket_name, bucket);
-            return bucket;
+        makeBucketInNeo(bucket_name); // Throws exception if it already exists in Db
+        NeoBackedBucket bucket = new NeoBackedBucket(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
+        bucket_cache.put(bucket_name, bucket);
+        return bucket;
     }
 
     @Override
     public <T extends LXP> IBucket<T> makeBucket(final String bucket_name, Class<T> bucketType) throws RepositoryException, IOException {
 
             makeBucketInNeo(bucket_name); // Throws exception if it already exists in Db
-            IBucket<T> bucket = new NeoBackedBucket(this, bucket_name, getNeoBucketID(bucket_name), bucketType);
+            NeoBackedBucket<T> bucket = new NeoBackedBucket(this, bucket_name, getNeoBucketIDFromDb(bucket_name), bucketType);
             ((NeoBackedBucket) bucket).setPersistentTypeLabelID();
             bucket_cache.put(bucket_name, bucket);
             return bucket;
@@ -102,16 +102,6 @@ public class Repository implements IRepository {
     }
 
     @Override
-    public <T extends LXP> IIdtoLXPMap<T> makeIdtoLXPMap(String name, Class<T> bucketType) throws RepositoryException {
-        return null;
-    }
-
-    @Override
-    public <T extends LXP> IStringtoILXPMap<T> makeStringtoLXPMap(String name, Class<T> bucketType) throws RepositoryException {
-        return null;
-    }
-
-    @Override
     public boolean bucketExists(final String bucket_name) {
 
         try( Session s = bridge.getNewSession() ) {
@@ -126,6 +116,21 @@ public class Repository implements IRepository {
 
     public long getNeoBucketID(final String bucket_name) throws RepositoryException {
 
+        NeoBackedBucket bucket = bucket_cache.get(bucket_name);
+        if( bucket != null ) {
+            return bucket.getNeoId();
+        }
+
+        if( bucketExists(bucket_name) ) {
+            bucket = (NeoBackedBucket) makeBucket(bucket_name);  // has side effect of caching the bucket
+            return bucket.getNeoId();
+        }
+
+        throw new RepositoryException("getNeoBucketID: Bucket id not found for: " + bucket_name);
+    }
+
+    public long getNeoBucketIDFromDb(final String bucket_name) throws RepositoryException {
+
         try( Session s = bridge.getNewSession() ) {
             Result result = s.run(BUCKET_EXISTS_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
             if (result == null) {
@@ -139,6 +144,8 @@ public class Repository implements IRepository {
         }
     }
 
+
+
     @Override
     public void deleteBucket(final String bucket_name) throws RepositoryException {
 
@@ -151,9 +158,11 @@ public class Repository implements IRepository {
     @Override
     public IBucket getBucket(final String bucket_name) throws RepositoryException {
 
-        if (bucketExists(bucket_name)) {
-            final IBucket bucket = bucket_cache.get(bucket_name);
-            return bucket != null ? bucket : new NeoBackedBucket(this,bucket_name, getNeoBucketID(bucket_name));
+        final IBucket bucket = bucket_cache.get(bucket_name);
+        if( bucket != null ) {
+            return bucket;
+        } else if (bucketExists(bucket_name) ) {
+            return new NeoBackedBucket(this,bucket_name, getNeoBucketIDFromDb(bucket_name));
         }
         throw new RepositoryException("bucket does not exist with name: <" + bucket_name + ">");
     }
@@ -161,35 +170,21 @@ public class Repository implements IRepository {
     @Override
     public <T extends LXP> IBucket<T> getBucket(final String bucket_name, final Class<T> bucketType) throws RepositoryException {
 
-        if (bucketExists(bucket_name)) {
-            IBucket bucket = bucket_cache.get(bucket_name);
-            if (bucket == null) {
-                NeoBackedBucket<T> neobucket = new NeoBackedBucket<T>(this, bucket_name, getNeoBucketID(bucket_name), bucketType);
-                if (!neobucket.persistentLabelIsCorrect()) {
-                    throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
-                }
-                return neobucket;
+        final IBucket bucket = bucket_cache.get(bucket_name);
+        if( bucket != null ) {
+            if (((NeoBackedBucket) bucket).bucketTypeIsCorrect(bucketType)) {
+                return bucket;
             } else {
-                if (((NeoBackedBucket) bucket).bucketTypeIsCorrect(bucketType)) {
-                    return bucket;
-                } else {
-                    throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
-                }
+                throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
             }
+        } else if (bucketExists(bucket_name) ) {
+            NeoBackedBucket<T> neobucket = new NeoBackedBucket<T>(this, bucket_name, getNeoBucketIDFromDb(bucket_name), bucketType);
+            if (!neobucket.persistentLabelIsCorrect()) {
+                    throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
+            }
+            return neobucket;
         }
         throw new RepositoryException("bucket does not exist with name: <" + bucket_name + ">");
-    }
-
-    @Override
-    public <T extends LXP> IIdtoLXPMap<T> getIdtoLXPMap(String name, Class<T> bucketType) throws RepositoryException {
-
-        return  null; // TODO new 8888 IdtoILXPMap( name, this, bucketType, false );
-    }
-
-    @Override
-    public <T extends LXP> IStringtoILXPMap<T> getStringtoLXPMap(String name, Class<T> bucketType) throws RepositoryException {
-
-        return null; // TODO 8888 new StringtoILXPMap( name, this, bucketType, false );
     }
 
     @Override

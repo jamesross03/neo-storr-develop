@@ -81,4 +81,9 @@ public interface IStore {
      * @return the neo4J bridge created by the store
      */
     NeoDbCypherBridge getBridge();
+
+    /**
+     * close the store
+     */
+    void close() throws Exception;
 }

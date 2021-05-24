@@ -16,8 +16,6 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-
-import org.junit.Before;
 import org.junit.Test;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.IllegalKeyException;
@@ -25,46 +23,30 @@ import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-public class StaticBucketSizeTest extends CommonTest {
+public class JPOTypedBucketTest extends CommonTest {
 
-    private static String generic_bucket_name1 = "BUCKET1";
-    private IBucket<BBB> b;
-
-    @Before
-    public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
-
-        super.setUp();
-
-        try {
-            repository.deleteBucket(generic_bucket_name1);
-        } catch ( Exception e ) {
-            System.out.println( "Bucket: " + generic_bucket_name1 + " did not exist before test - that is ok.");
-        }
-
-        b = repository.makeBucket(generic_bucket_name1, BBB.class);
-    }
+    static final String JPO_BUCKET_NAME = "JPOBucket";
 
     @Test
-    public synchronized void testSize() throws RepositoryException, IllegalKeyException, BucketException {
+    public synchronized void testJPOCreation() throws RepositoryException, IllegalKeyException, BucketException, IOException {
 
-        Set<BBB> birth_set = new HashSet<>();
-
-        for( int i = 0; i < 10; i++ ) {
-            BBB birth = new BBB();
-            birth.put(BBB.FORENAME, Integer.toString(i));
-            birth.put(BBB.SURNAME, "Dearle");
-            b.makePersistent(birth);
-            birth_set.add(birth);
+        if( ! repository.bucketExists(JPO_BUCKET_NAME)) {
+            repository.makeBucket(JPO_BUCKET_NAME, Person.class);
         }
 
-        assertEquals( b.size(), birth_set.size() );
+        final IBucket<Person> bucket = repository.getBucket(JPO_BUCKET_NAME, Person.class);
+
+        final Person p1 = new Person(42, "home");
+
+        bucket.makePersistent(p1);
+
+        final long id = p1.getId();
+        final Person p2 = bucket.getObjectById(id);
+        assertEquals(p2, p1);
+
+
     }
-
-
 }

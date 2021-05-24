@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
 public class StaticLXPStreamsTest extends CommonTest {
 
     private static String generic_bucket_name1 = "BUCKET1";
-    private IBucket<Birth> b;
+    private IBucket<BBB> b;
 
     @Before
     public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
@@ -50,24 +50,24 @@ public class StaticLXPStreamsTest extends CommonTest {
             System.out.println( "Bucket: " + generic_bucket_name1 + " did not exist before test - that is ok.");
         }
 
-        b = repository.makeBucket(generic_bucket_name1,Birth.class);
+        b = repository.makeBucket(generic_bucket_name1, BBB.class);
     }
 
     @Test
     public synchronized void testInputStream() throws RepositoryException, IllegalKeyException, BucketException {
 
-        Set<Birth> birth_set = new HashSet<>();
+        Set<BBB> birth_set = new HashSet<>();
 
         for( int i = 0; i < 10; i++ ) {
-            Birth birth = new Birth();
-            birth.put(Birth.FORENAME, Integer.toString(i));
-            birth.put(Birth.SURNAME, "Input");
+            BBB birth = new BBB();
+            birth.put(BBB.FORENAME, Integer.toString(i));
+            birth.put(BBB.SURNAME, "Input");
             b.makePersistent(birth);
             birth_set.add(birth);
         }
-        IInputStream<Birth> in_stream = b.getInputStream();
+        IInputStream<BBB> in_stream = b.getInputStream();
         int i = 0;
-        for( Birth b : in_stream ) {
+        for( BBB b : in_stream ) {
             assertTrue( birth_set.contains(b) );
             i++;
         }
@@ -77,19 +77,19 @@ public class StaticLXPStreamsTest extends CommonTest {
     @Test
     public synchronized void testOutputStream() throws RepositoryException, IllegalKeyException, BucketException {
 
-        Set<Birth> birth_set = new HashSet<>();
+        Set<BBB> birth_set = new HashSet<>();
 
-        IOutputStream<Birth> out_stream = b.getOutputStream();
+        IOutputStream<BBB> out_stream = b.getOutputStream();
 
         for( int i = 0; i < 10; i++ ) {
-            Birth birth = new Birth();
-            birth.put(Birth.FORENAME, Integer.toString(i));
-            birth.put(Birth.SURNAME, "Output");
+            BBB birth = new BBB();
+            birth.put(BBB.FORENAME, Integer.toString(i));
+            birth.put(BBB.SURNAME, "Output");
             out_stream.add(birth);
             birth_set.add(birth);
         }
 
-        for( Birth birth : birth_set ) {
+        for( BBB birth : birth_set ) {
             assertTrue( b.contains( birth.getId() ) );
         }
     }

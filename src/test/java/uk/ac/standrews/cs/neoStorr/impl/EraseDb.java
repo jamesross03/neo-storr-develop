@@ -41,7 +41,7 @@ public class EraseDb  {
                 System.out.println("Storr constructs in Neo4J deleted");
             }
         } catch (Exception e) {
-            System.out.println( "Execption in bridge: " + e.getMessage() );
+            System.out.println( "Exception in bridge: " + e.getMessage() );
         } finally {
             System.out.println("Execution complete");
         }

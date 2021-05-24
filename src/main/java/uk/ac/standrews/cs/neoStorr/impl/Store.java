@@ -27,10 +27,7 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.util.NeoDbCypherBridge;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.neo4j.driver.Values.parameters;
 import static uk.ac.standrews.cs.neoStorr.impl.Repository.repositoryNameIsLegal;
@@ -57,6 +54,11 @@ public class Store implements IStore {
 
     // fully recursive: "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET)-[l:STORR_MEMBER]-(o) DETACH DELETE r,b,o";
 
+    private static final String CREATE_ID_CONSTRAINT_QUERY = "CREATE CONSTRAINT ON (n:STORR_ID) ASSERT n.propertyName IS UNIQUE";
+    private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"StorrIndex\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
+
+    private List<String> init_indices_queries = Arrays.asList( CREATE_ID_CONSTRAINT_QUERY,STORR_INDEX_QUERY );
+    private static final String SHOW_INDEXES_QUERY = "SHOW INDEXES";
 
     public Store() throws StoreException {
 
@@ -68,10 +70,42 @@ public class Store implements IStore {
 
             transaction_manager = new TransactionManager(this);
             type_factory = new TypeFactory(this);
+            initialiseIndices();
 
         } catch ( RepositoryException e) {
             throw new StoreException(e.getMessage());
         }
+    }
+
+    /**
+     * Initialises the indices if they are not already set up.
+     */
+    private void initialiseIndices() {
+        try (Session session = bridge.getNewSession(); ) {
+            if( ! indicesInitialisedAlready(session) ) {
+                for (String query : init_indices_queries) {
+                    try {
+                        session.run(query);
+                    } catch (RuntimeException e) {
+                        System.out.println("Exception in constraint: " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    public void close() throws Exception {
+        bridge.close();
+    }
+
+    private boolean indicesInitialisedAlready(Session session) {
+        Result r = session.run( SHOW_INDEXES_QUERY );
+        while (r.hasNext()) {
+            if( r.next().get("name").asString().equals( "StorrIndex" ) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public synchronized static IStore getInstance() {
@@ -105,6 +139,13 @@ public class Store implements IStore {
 
     @Override
     public boolean repositoryExists(String name) {
+        if( repository_cache.containsKey(name) ) {
+            return true;
+        }
+        return repositoryExistsInDB(name);
+    }
+
+    private boolean repositoryExistsInDB(String name) {
         try( Session s = bridge.getNewSession(); ) {
             Result result = s.run(REPO_EXISTS_QUERY, parameters("name", name));
             List<Node> nodes = result.list(r -> r.get("r").asNode());
@@ -113,6 +154,21 @@ public class Store implements IStore {
             }
             return true;
         }
+    }
+
+    @Override
+    public IRepository getRepository(String name) throws RepositoryException {
+
+        if (repository_cache.containsKey(name)) {
+            return repository_cache.get(name);
+        } else {
+            if (repositoryExistsInDB(name)) {
+                IRepository r = new Repository(this, name);
+                repository_cache.put(name, r);
+                return r;
+            }
+        }
+        throw new RepositoryException("repository does not exist: " + name);
     }
 
     @Override
@@ -129,22 +185,6 @@ public class Store implements IStore {
 
     }
 
-    ////////////////// private and protected methods //////////////////
-
-    @Override
-    public IRepository getRepository(String name) throws RepositoryException {
-
-        if (repositoryExists(name)) {
-            if (repository_cache.containsKey(name)) {
-                return repository_cache.get(name);
-            } else {
-                IRepository r = new Repository(this, name);
-                repository_cache.put(name, r);
-                return r;
-            }
-        }
-        throw new RepositoryException("repository does not exist: " + name);
-    }
 
     @Override
     public Iterator<IRepository> getIterator() {
@@ -154,6 +194,9 @@ public class Store implements IStore {
 //
 //        return repository_path.resolve(name);
 //    }
+
+    ////////////////// private and protected methods //////////////////
+
 
     private void createRepositoryInNeo(String name) throws RepositoryException {
 

@@ -44,15 +44,15 @@ public class SimpleTypedLXPTest extends CommonTest {
             System.out.println( "Bucket: " + generic_bucket_name1 + " did not exist before test - that is ok.");
         }
 
-        repository.makeBucket(generic_bucket_name1,Birth.class);
+        repository.makeBucket(generic_bucket_name1, BBB.class);
     }
 
     @Test
     public synchronized void testLXPCreation() throws RepositoryException, IllegalKeyException, BucketException {
-        IBucket<Birth> b = repository.getBucket(generic_bucket_name1);
-        Birth al = new Birth();
-        al.put( Birth.FORENAME,"Al" );
-        al.put( Birth.SURNAME,"Dearle" );
+        IBucket<BBB> b = repository.getBucket(generic_bucket_name1);
+        BBB al = new BBB();
+        al.put( BBB.FORENAME,"Al" );
+        al.put( BBB.SURNAME,"Dearle" );
         b.makePersistent( al );
 
         long id = al.getId();

@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class StaticGetOidsTest extends CommonTest {
 
     private static String generic_bucket_name1 = "BUCKET1";
-    private IBucket<Birth> b;
+    private IBucket<BBB> b;
 
     @Before
     public void setUp() throws RepositoryException, IOException, URISyntaxException, BucketException {
@@ -48,7 +48,7 @@ public class StaticGetOidsTest extends CommonTest {
             System.out.println( "Bucket: " + generic_bucket_name1 + " did not exist before test - that is ok.");
         }
 
-        b = repository.makeBucket(generic_bucket_name1,Birth.class);
+        b = repository.makeBucket(generic_bucket_name1, BBB.class);
     }
 
 
@@ -58,9 +58,9 @@ public class StaticGetOidsTest extends CommonTest {
         Set<Long> created_oids = new HashSet<>();
 
         for( int i = 0; i < 10; i++ ) {
-            Birth birth = new Birth();
-            birth.put(Birth.FORENAME, Integer.toString(i));
-            birth.put(Birth.SURNAME, "Dearle");
+            BBB birth = new BBB();
+            birth.put(BBB.FORENAME, Integer.toString(i));
+            birth.put(BBB.SURNAME, "Dearle");
             created_oids.add( birth.getId() );
             b.makePersistent(birth);
         }
