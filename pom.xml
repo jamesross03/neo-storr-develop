@@ -29,7 +29,7 @@
 
     <groupId>uk.ac.standrews.cs</groupId>
     <artifactId>neo-storr</artifactId>
-    <version>1.0.0</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>neo-storr</name>
 
