@@ -68,12 +68,6 @@ public class TypeFactory {
         doHousekeeping("lxp", lxp_type);
     }
 
-    public IReferenceType createType(final String json_encoded_type_descriptor_file_name, final String type_name) {
-        final LXPReferenceType ref_type = new LXPReferenceType(json_encoded_type_descriptor_file_name, type_repository, type_reps_bucket);
-        doHousekeeping(type_name, ref_type);
-        return ref_type;
-    }
-
     public IReferenceType createType(final Class c, final String type_name) {
         final DynamicLXP typerep = Types.getTypeRep(c);
         final LXPReferenceType ref_type = new LXPReferenceType(typerep);

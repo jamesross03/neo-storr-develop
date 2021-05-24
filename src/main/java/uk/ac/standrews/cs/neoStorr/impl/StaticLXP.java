@@ -23,7 +23,6 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
 import uk.ac.standrews.cs.neoStorr.interfaces.IType;
 import uk.ac.standrews.cs.neoStorr.types.LXPReferenceType;
-import uk.ac.standrews.cs.utilities.JSONReader;
 
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -121,10 +120,6 @@ public abstract class StaticLXP extends LXP {
         return classname;
     }
 
-
-    public StaticLXP(final JSONReader reader, final IBucket bucket) throws PersistentObjectException {
-        throw new RuntimeException("Code commented 8888"); // this(getNextFreePID(), reader, bucket); // TODO Unused? 8888
-    }
 
     @Override
     public void check(final String key) throws IllegalKeyException {

@@ -314,12 +314,8 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         if (contains(storr_id)) {
             throw new BucketException("records may not be overwritten - use update");
         } else {
-            if( record instanceof LXP ) {
-                object_cache.put(record.getId(),record);
-                writePersistentObject((LXP) record); // normal object write
-            } else {
-                throw new BucketException( "This implementation only capable of writing LXP instances"); //TODO 8888
-            }
+            object_cache.put(storr_id, record);
+            writePersistentObject((LXP) record); // normal object write
         }
     }
 
@@ -376,7 +372,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         if( record_to_write instanceof LXP ) {
             writeLXP( (LXP) record_to_write );
         } else {
-            throw new BucketException( "This impl only capable of writing LXP instances"); // TODO 8888
+            throw new BucketException( "This impl only capable of writing LXP instances");
         }
     }
 

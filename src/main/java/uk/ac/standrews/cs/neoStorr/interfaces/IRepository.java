@@ -17,7 +17,6 @@
 package uk.ac.standrews.cs.neoStorr.interfaces;
 
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
-import uk.ac.standrews.cs.neoStorr.impl.PersistentObject;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 
 import java.io.IOException;
@@ -93,7 +92,7 @@ public interface IRepository {
      * @param <T>      - the type of the required bucket content types.
      * @return an iterator over the appropriate buckets.
      */
-    <T extends PersistentObject> Iterator<IBucket<T>> getIterator(Class<T> bucketType);
+    <T extends LXP> Iterator<IBucket<T>> getIterator(Class<T> bucketType);
 
     /**
      * @return the name of the repository

@@ -134,7 +134,9 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
             }
         }
         try {
-            return (T) b.getObjectById(getOid());
+            T result = b.getObjectById(getOid());
+            ref = new WeakReference<T>(result);  // cache the object we have just loaded.
+            return result;
         } catch (StoreException e) {
             throw new BucketException(e);
         }

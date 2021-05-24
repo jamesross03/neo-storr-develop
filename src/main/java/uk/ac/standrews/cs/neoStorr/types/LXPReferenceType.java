@@ -32,18 +32,6 @@ public class LXPReferenceType implements IReferenceType {
 
     private LXP typerep;
 
-    public LXPReferenceType(String json_encoded_type_descriptor_file_name, IRepository repo, IBucket bucket) {
-
-//        try (BufferedReader reader = Files.newBufferedReader(Paths.get(json_encoded_type_descriptor_file_name), FileManipulation.FILE_CHARSET)) {
-//
-//            typerep = new DynamicLXP(new JSONReader(reader), bucket);
-//
-//        } catch (PersistentObjectException | IOException | IllegalKeyException e) {
-//            throw new ReferenceException("Error creating LXPReference", e);
-//        }
-        throw new ReferenceException("Error creating LXPReference 8888", null); // TODO 8888
-    }
-
     public LXPReferenceType(DynamicLXP typerep) {
         this.typerep = typerep;
     }

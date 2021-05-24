@@ -20,14 +20,13 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.types.Node;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.neoStorr.interfaces.*;
+import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
+import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
+import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.util.NeoDbCypherBridge;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.neo4j.driver.Values.parameters;
 
@@ -47,6 +46,7 @@ public class Repository implements IRepository {
     private static final String MAKE_BUCKET_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name}) MERGE (r)-[c:STORR_CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) return b";
     private static final String BUCKET_EXISTS_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) return b";
     private static final String DELETE_BUCKET_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET {name:$bucket_name}) DETACH DELETE b";
+    private static final String ALL_BUCKET_NAMES_QUERY = "MATCH (r:STORR_REPOSITORY {name: $repo_name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET) return b.name";
 
     private final IStore store;
     private final String repository_name;
@@ -188,17 +188,6 @@ public class Repository implements IRepository {
     }
 
     @Override
-    public Iterator<String> getBucketNameIterator() {
-
-        throw new RuntimeException("Code commented"); //return new BucketNamesIterator(repository_directory);  // TODO 8888
-    }
-
-    @Override
-    public <T extends PersistentObject> Iterator<IBucket<T>> getIterator(Class<T> bucketType) {
-        throw new RuntimeException("Code commented"); //return new BucketIterator(this, repository_directory, bucketType); // TODO 8888
-    }
-
-    @Override
     public String getName() {
         return repository_name;
     }
@@ -222,5 +211,61 @@ public class Repository implements IRepository {
     public static boolean repositoryNameIsLegal(String name) {
 
         return name.matches(LEGAL_CHARS_PATTERN);
+    }
+
+    @Override
+    public Iterator<String> getBucketNameIterator() {
+
+        try( Session s = bridge.getNewSession() ) {
+            Result result = s.run(ALL_BUCKET_NAMES_QUERY, parameters("repo_name", this.repository_name));
+            if (result == null) {
+                return new Iterator<String>() {
+
+                    @Override
+                    public boolean hasNext() {
+                        return false;
+                    }
+
+                    @Override
+                    public String next() {
+                        throw new NoSuchElementException();
+                    }
+                };
+            }
+            return result.list(r -> r.get("b.name").asString()).iterator();
+        }
+    }
+
+    @Override
+    public <T extends LXP> Iterator<IBucket<T>> getIterator(Class<T> bucketType) {
+        Repository parent_repo = this;
+
+        return new Iterator<IBucket<T>>() {
+
+            private Class<T> bt = bucketType;
+            Iterator<String> name_iterator = parent_repo.getBucketNameIterator();
+
+            @Override
+            public boolean hasNext() {
+                return name_iterator.hasNext();
+            }
+
+            @Override
+            public IBucket<T> next() {
+                IBucket<T> bucket = null;
+                do {
+                    try {
+                        String bucket_name = name_iterator.next();  // if there is not one this will exit with exception
+                        bucket = parent_repo.getBucket(bucket_name, bt);
+                    } catch (RepositoryException e) {
+                        // if the bucket is the wrong type just eat the exception and try again.
+                    }
+                }
+                while (bucket == null);
+                {
+                    return bucket;
+                }
+            }
+        };
     }
 }
