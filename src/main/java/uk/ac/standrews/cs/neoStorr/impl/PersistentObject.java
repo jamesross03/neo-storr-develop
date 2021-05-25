@@ -96,7 +96,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
         if (this == o) return true;
         if (!(o instanceof PersistentObject)) return false;
         PersistentObject that = (PersistentObject) o;
-        return $$$$id$$$$id$$$$ == that.$$$$id$$$$id$$$$ && Objects.equals($$$bucket$$$bucket$$$, that.$$$bucket$$$bucket$$$);
+        return $$$$id$$$$id$$$$ == that.$$$$id$$$$id$$$$;
     }
 
     @Override

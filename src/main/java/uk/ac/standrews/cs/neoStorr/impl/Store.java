@@ -50,9 +50,12 @@ public class Store implements IStore {
 
     private static final String CREATE_REPO_QUERY = "MERGE (a:STORR_REPOSITORY {name: $name})";
     private static final String REPO_EXISTS_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name}) return r";
-    private static final String DELETE_REPO_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET) DETACH DELETE r,b";
+    private static final String DELETE_EMPTY_REPO_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name}) DETACH DELETE r";
+    private static final String DELETE_REPO_CONTENTS_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET) DETACH DELETE r,b";
 
-    // fully recursive: "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET)-[l:STORR_MEMBER]-(o) DETACH DELETE r,b,o";
+    // 2 level: "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET) DETACH DELETE r,b"
+    // 3 level: "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET)-[l:STORR_MEMBER]-(o) DETACH DELETE r,b,o";
+    // fully recursive??
 
     private static final String CREATE_ID_CONSTRAINT_QUERY = "CREATE CONSTRAINT ON (n:STORR_ID) ASSERT n.propertyName IS UNIQUE";
     private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"StorrIndex\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
@@ -180,7 +183,8 @@ public class Store implements IStore {
         repository_cache.remove(repository_name);
 
         try( Session session = bridge.getNewSession(); ) {
-            session.writeTransaction(tx -> tx.run(DELETE_REPO_QUERY,parameters("name", repository_name)));
+            session.writeTransaction(tx -> tx.run(DELETE_REPO_CONTENTS_QUERY,parameters("name", repository_name)));
+            session.writeTransaction(tx -> tx.run(DELETE_EMPTY_REPO_QUERY,parameters("name", repository_name)));
         }
 
     }

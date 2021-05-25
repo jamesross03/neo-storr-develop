@@ -18,6 +18,8 @@ package uk.ac.standrews.cs.neoStorr.impl;
 
 import org.junit.Test;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
+import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
+import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,5 +66,24 @@ public class RepositoryTest extends CommonTest {
         for (String name : ILLEGAL_NAMES) {
             assertFalse(bucketNameIsLegal(name));
         }
+    }
+
+    @Test
+    public void createDeleteEmptyRepo() throws RepositoryException {
+
+        store.makeRepository( "REPO65981737563412");
+        assertTrue( store.repositoryExists("REPO65981737563412"));
+        store.deleteRepository("REPO65981737563412");
+        assertFalse( store.repositoryExists("REPO65981737563412"));
+    }
+
+    @Test
+    public void createDeleteRepoWithContent() throws RepositoryException {
+
+        IRepository repo = store.makeRepository("REPO65983317363412");
+        assertTrue( store.repositoryExists("REPO65983317363412"));
+        IBucket bucket = repo.makeBucket("BUCKET327823978");
+        store.deleteRepository("REPO65983317363412");
+        assertFalse( store.repositoryExists("REPO65983317363412"));
     }
 }

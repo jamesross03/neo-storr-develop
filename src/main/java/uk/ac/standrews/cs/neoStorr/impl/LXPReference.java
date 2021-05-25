@@ -143,10 +143,22 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     }
 
     public IBucket<T> getBucket(Class clazz) throws BucketException, RepositoryException {
+        if( ref != null ) {
+            T obj = ref.get();
+            if (obj != null) {
+                return getBucket(clazz);
+            }
+        }
         return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), clazz);
     }
 
     public IBucket getBucket() throws RepositoryException {
+        if( ref != null ) {
+            LXP obj = ref.get();
+            if (obj != null) {
+                return (IBucket) obj.getBucket();
+            }
+        }
         return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName());
     }
 
@@ -156,8 +168,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         }
         if (obj instanceof LXPReference) {
             LXPReference sr = (LXPReference) obj;
-            return sr == this ||
-                    (sr.getBucketName().equals(this.getBucketName()) && sr.getRepositoryName().equals(this.getRepositoryName()) && sr.getOid().equals(this.getOid()));
+            return sr == this || sr.getOid().equals(this.getOid());
         } else {
             return false;
         }
