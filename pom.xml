@@ -27,11 +27,9 @@
     </parent>
 
     <properties>
-
         <maven.repository.host>maven-host.cs.st-andrews.ac.uk</maven.repository.host>
         <maven.repository.path>/cs/unique/cs-maven-repository/</maven.repository.path>
         <maven.repository.user>maven-repo</maven.repository.user>
-
     </properties>
 
 
@@ -71,12 +69,6 @@
             <groupId>org.neo4j.driver</groupId>
             <artifactId>neo4j-java-driver</artifactId>
             <version>4.2.0</version>
-        </dependency>
-
-        <dependency> <!-- If you're using the Bolt driver -->
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-ogm-bolt-driver</artifactId>
-            <version>3.2.20</version>
         </dependency>
 
     </dependencies>
