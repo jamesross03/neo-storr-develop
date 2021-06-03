@@ -1,6 +1,6 @@
 <!--
 
-    Copyright 2017 Systems Research Group, University of St Andrews:
+    Copyright 2021 Systems Research Group, University of St Andrews:
     <https://github.com/stacs-srg>
 
     This file is part of the module neo-storr.
@@ -23,16 +23,9 @@
     <parent>
         <groupId>uk.ac.standrews.cs</groupId>
         <artifactId>common-pom</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <maven.repository.host>maven-host.cs.st-andrews.ac.uk</maven.repository.host>
-        <maven.repository.path>/cs/unique/cs-maven-repository/</maven.repository.path>
-        <maven.repository.user>maven-repo</maven.repository.user>
-    </properties>
-
-    <groupId>uk.ac.standrews.cs</groupId>
     <artifactId>neo-storr</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -41,43 +34,49 @@
     <description>Storr API with Neo4J backend</description>
     <inceptionYear>2021</inceptionYear>
 
+    <properties>
+
+       <commons-lang3-version>3.12.0</commons-lang3-version>
+
+    </properties>
+
+    <repositories>
+
+        <!-- This has to be replicated from the parent POM so the parent POM can be found. -->
+
+        <repository>
+            <id>uk.ac.standrews.cs.maven.repository</id>
+            <name>School of Computer Science Maven Repository</name>
+            <url>https://maven.cs.st-andrews.ac.uk/</url>
+        </repository>
+
+    </repositories>
+
     <dependencies>
 
         <!-- To check for updated versions of dependencies, run on command line:
              mvn versions:display-dependency-updates -->
 
         <dependency>
-            <groupId>com.github.stacs-srg</groupId>
+            <groupId>uk.ac.standrews.cs</groupId>
             <artifactId>utilities</artifactId>
-            <version>1.0.3</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>4.2.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j.driver</groupId>
-            <artifactId>neo4j-java-driver</artifactId>
-            <version>4.2.0</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3-version}</version>
         </dependency>
 
     </dependencies>
 
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
 
                 <!-- Temporarily suppress tests until they're made self-contained. -->
                 <configuration>
@@ -87,14 +86,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
-            </plugin>
-
         </plugins>
     </build>
-
 
 </project>  
