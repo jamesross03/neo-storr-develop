@@ -408,8 +408,14 @@ public abstract class LXP extends PersistentObject {
 
             final String key = getMetaData().getFieldName(i);
             writer.key(key);
-            final Object value = field_storage[i];
-
+            Object value = null;
+            try {
+                  value = field_storage[i];
+            } catch( IndexOutOfBoundsException e ) {
+                // if the static LXP has been dynamically created - e.g.
+                // during type conversion, not all storage fields may exist
+                // so much accomodate for that.
+            }
             if (value instanceof ArrayList) {
                 writer.array();
                 for (final Object o : (List) value) {
@@ -432,8 +438,14 @@ public abstract class LXP extends PersistentObject {
         Map<String,Object> map = new HashMap<>();
         for (int i = 0; i < getMetaData().getFieldCount(); i++) {
             final String key = getMetaData().getFieldName(i);
-            final Object value = field_storage[i];
-            addValueToMap( map, key, value );
+            try {
+                final Object value = field_storage[i];
+                addValueToMap(map, key, value);
+            }
+            catch( IndexOutOfBoundsException e ) {
+                // can occur if fields are missing - dynamic instantiation.
+                // don't do anything.
+            }
         }
         return map;
     }
@@ -544,7 +556,9 @@ public abstract class LXP extends PersistentObject {
                     check(key);
                     put(field_name_to_slot.get(key), value);
                 } else {
-                    throw new PersistentObjectException("No matching value for the key " + key);
+                    // can occur if dynamically constructed and data has missing field values.
+                    // also for null refs
+                    put(field_name_to_slot.get(key), value);
                 }
             }
         }
