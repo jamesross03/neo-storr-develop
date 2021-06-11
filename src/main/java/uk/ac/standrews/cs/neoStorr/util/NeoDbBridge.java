@@ -20,7 +20,7 @@ public abstract class NeoDbBridge implements AutoCloseable {
 
     protected static final String default_url = "bolt://localhost:7687";
     protected static final String default_user = "neo4j";
-    protected static final String default_password = "password";
+    protected static final String default_password = "B4hFk2eK"; // TODO - should be elsewhere
 
     protected final String uri;
     protected final String user;

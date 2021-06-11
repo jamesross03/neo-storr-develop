@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: uk.ac.standrews.cs:utilities:1.0-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/uk/ac/standrews/cs/utilities/1.0-SNAPSHOT/utilities-1.0-SNAPSHOT.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/uk/ac/standrews/cs/utilities/1.0-SNAPSHOT/utilities-1.0-20210603.200949-1.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/uk/ac/standrews/cs/utilities/1.0-SNAPSHOT/utilities-1.0-SNAPSHOT-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/uk/ac/standrews/cs/utilities/1.0-SNAPSHOT/utilities-1.0-20210603.200949-1-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/uk/ac/standrews/cs/utilities/1.0-SNAPSHOT/utilities-1.0-SNAPSHOT-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/uk/ac/standrews/cs/utilities/1.0-SNAPSHOT/utilities-1.0-20210603.200949-1-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
