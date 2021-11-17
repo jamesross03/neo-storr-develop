@@ -38,17 +38,14 @@ public class BucketIteratorTest extends CommonTest {
     private static final String UNIQUE_BUCKET_NAME3 = Double.toString( new Random().nextDouble() );
     private static final String UNIQUE_BUCKET_NAME4 = Double.toString( new Random().nextDouble() );
 
-
     @Test
-    public void checkRepoExistsTest() throws RepositoryException {
+    public void checkRepoExistsTest() {
 
         assertTrue(store.repositoryExists(REPOSITORY_NAME));
     }
 
     @Test
     public void nameIteratorTest() throws RepositoryException {
-
-        store = new Store();
 
         repository = store.makeRepository("ITER523463645754");
 
@@ -74,13 +71,10 @@ public class BucketIteratorTest extends CommonTest {
         repository.deleteBucket(UNIQUE_BUCKET_NAME4);
 
         store.deleteRepository("ITER523463645754");
-
     }
 
     @Test
     public void repoIteratorTest() throws IOException, RepositoryException {
-
-        store = new Store();
 
         repository = store.makeRepository("ITER523463645754");
 

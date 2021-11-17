@@ -16,6 +16,7 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
@@ -31,23 +32,17 @@ public abstract class CommonTest {
 
     static final String REPOSITORY_NAME = "TEST_REPO";
 
-    private static final boolean DEBUG = true;
-
     protected IStore store;
     protected IRepository repository;
-
-    Path store_path;
 
     @Before
     public void setUp() throws RepositoryException, IOException, StoreException, URISyntaxException, BucketException {
 
-        store = new Store();
+        store = Store.getInstance();
 
         try {
             repository = store.getRepository(REPOSITORY_NAME);
         } catch( Exception e ) {
-            System.out.println( "Got exception getting repo:" + e.getMessage() );
-            System.out.println( "Creating repo" );
             repository = store.makeRepository(REPOSITORY_NAME);
         }
     }

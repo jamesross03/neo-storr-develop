@@ -18,20 +18,22 @@ package uk.ac.standrews.cs.neoStorr.util;
 
 public abstract class NeoDbBridge implements AutoCloseable {
 
-    protected static final String default_url = "bolt://localhost:7687";
-    protected static final String default_user = "neo4j";
-    protected static final String default_password = "B4hFk2eK"; // TODO - should be elsewhere
+    public static final int DEFAULT_BOLT_PORT = 7687;
 
-    protected final String uri;
+    public static final String DEFAULT_URL = "bolt://localhost:" + DEFAULT_BOLT_PORT;
+    public static final String DEFAULT_USER = "neo4j";
+    public static final String DEFAULT_PASSWORD = "password";
+
+    protected final String url;
     protected final String user;
     protected final String password;
 
     public NeoDbBridge() {
-        this( default_url,default_user,default_password );
+        this(DEFAULT_URL, DEFAULT_USER, DEFAULT_PASSWORD);
     }
 
-    public NeoDbBridge(String uri, String user, String password) {
-        this.uri = uri;
+    public NeoDbBridge(final String url, final String user, final String password) {
+        this.url = url;
         this.user = user;
         this.password = password;
     }

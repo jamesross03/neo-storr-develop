@@ -26,16 +26,16 @@ public class NeoDbCypherBridge extends NeoDbBridge implements AutoCloseable {
     private final Driver driver;
 
     public NeoDbCypherBridge() {
-        this( default_url,default_user,default_password );
+        this(DEFAULT_URL, DEFAULT_USER, DEFAULT_PASSWORD);
     }
 
-    public NeoDbCypherBridge(String uri, String user, String password) {
-        super(uri, user, password);
-        driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
+    public NeoDbCypherBridge(String url, String user, String password) {
+        super(url, user, password);
+        driver = GraphDatabase.driver(url, AuthTokens.basic(user, password));
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         driver.close();
     }
 

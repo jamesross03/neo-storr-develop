@@ -73,11 +73,6 @@ public interface IStore {
     IRepository getRepository(String name) throws RepositoryException;
 
     /**
-     * @return the repositories contained in the store
-     */
-    Iterator<IRepository> getIterator();
-
-    /**
      * @return the neo4J bridge created by the store
      */
     NeoDbCypherBridge getBridge();

@@ -37,14 +37,11 @@ import static uk.ac.standrews.cs.neoStorr.impl.Repository.repositoryNameIsLegal;
  */
 public class Store implements IStore {
 
-    private static Store instance;
-    private ITransactionManager transaction_manager;
+    private static Store instance = null;
+
+    private final ITransactionManager transaction_manager;
     private final TypeFactory type_factory;
     private final Map<String, IRepository> repository_cache;
-
-    public NeoDbCypherBridge getBridge() {
-        return bridge;
-    }
 
     private final NeoDbCypherBridge bridge;
 
@@ -57,15 +54,14 @@ public class Store implements IStore {
     // 3 level: "MATCH (r:STORR_REPOSITORY {name: $name})-[c:STORR_CONTAINS]-(b:STORR_BUCKET)-[l:STORR_MEMBER]-(o) DETACH DELETE r,b,o";
     // fully recursive??
 
+    private static final String STORR_INDEX_NAME = "StorrIndex";
     private static final String CREATE_ID_CONSTRAINT_QUERY = "CREATE CONSTRAINT ON (n:STORR_ID) ASSERT n.propertyName IS UNIQUE";
-    private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"StorrIndex\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
+    private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"" + STORR_INDEX_NAME + "\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
 
-    private List<String> init_indices_queries = Arrays.asList( CREATE_ID_CONSTRAINT_QUERY,STORR_INDEX_QUERY );
-    private static final String SHOW_INDEXES_QUERY = "SHOW INDEXES";
+    private final List<String> INIT_INDICES_QUERIES = Arrays.asList(CREATE_ID_CONSTRAINT_QUERY, STORR_INDEX_QUERY);
+    private static final String SHOW_INDICES_QUERY = "SHOW INDEXES";
 
-    public Store() throws StoreException {
-
-        instance = this;
+    private Store() throws StoreException {
 
         try {
             bridge = new NeoDbCypherBridge();
@@ -75,23 +71,29 @@ public class Store implements IStore {
             type_factory = new TypeFactory(this);
             initialiseIndices();
 
-        } catch ( RepositoryException e) {
-            throw new StoreException(e.getMessage());
+        } catch (RepositoryException e) {
+            throw new StoreException(e);
         }
+    }
+
+    public synchronized static IStore getInstance() {
+
+        if (instance == null) instance = new Store();
+        return instance;
+    }
+
+    public NeoDbCypherBridge getBridge() {
+        return bridge;
     }
 
     /**
      * Initialises the indices if they are not already set up.
      */
     private void initialiseIndices() {
-        try (Session session = bridge.getNewSession(); ) {
-            if( ! indicesInitialisedAlready(session) ) {
-                for (String query : init_indices_queries) {
-                    try {
-                        session.run(query);
-                    } catch (RuntimeException e) {
-                        System.out.println("Exception in constraint: " + e.getMessage());
-                    }
+        try (Session session = bridge.getNewSession();) {
+            if (!indicesInitialisedAlready(session)) {
+                for (String query : INIT_INDICES_QUERIES) {
+                    session.run(query);
                 }
             }
         }
@@ -102,17 +104,13 @@ public class Store implements IStore {
     }
 
     private boolean indicesInitialisedAlready(Session session) {
-        Result r = session.run( SHOW_INDEXES_QUERY );
+        Result r = session.run(SHOW_INDICES_QUERY);
         while (r.hasNext()) {
-            if( r.next().get("name").asString().equals( "StorrIndex" ) ) {
+            if (r.next().get("name").asString().equals(STORR_INDEX_NAME)) {
                 return true;
             }
         }
         return false;
-    }
-
-    public synchronized static IStore getInstance() {
-        return instance;
     }
 
     @Override
@@ -131,31 +129,26 @@ public class Store implements IStore {
         if (!repositoryNameIsLegal(name)) {
             throw new RepositoryException("Illegal Repository name <" + name + ">");
         }
-        if( repositoryExists(name)) {
+        if (repositoryExists(name)) {
             throw new RepositoryException("Repository with name <" + name + "> already exists");
         }
         createRepositoryInNeo(name);
-        IRepository r = new Repository(this,name);
+        IRepository r = new Repository(this, name);
         repository_cache.put(name, r);
         return r;
     }
 
     @Override
     public boolean repositoryExists(String name) {
-        if( repository_cache.containsKey(name) ) {
-            return true;
-        }
-        return repositoryExistsInDB(name);
+        return repository_cache.containsKey(name) || repositoryExistsInDB(name);
     }
 
     private boolean repositoryExistsInDB(String name) {
-        try( Session s = bridge.getNewSession(); ) {
+
+        try (Session s = bridge.getNewSession()) {
             Result result = s.run(REPO_EXISTS_QUERY, parameters("name", name));
             List<Node> nodes = result.list(r -> r.get("r").asNode());
-            if (nodes.size() == 0) {
-                return false;
-            }
-            return true;
+            return nodes.size() != 0;
         }
     }
 
@@ -182,34 +175,23 @@ public class Store implements IStore {
 
         repository_cache.remove(repository_name);
 
-        try( Session session = bridge.getNewSession(); ) {
-            session.writeTransaction(tx -> tx.run(DELETE_REPO_CONTENTS_QUERY,parameters("name", repository_name)));
-            session.writeTransaction(tx -> tx.run(DELETE_EMPTY_REPO_QUERY,parameters("name", repository_name)));
+        try (Session session = bridge.getNewSession();) {
+            session.writeTransaction(tx -> tx.run(DELETE_REPO_CONTENTS_QUERY, parameters("name", repository_name)));
+            session.writeTransaction(tx -> tx.run(DELETE_EMPTY_REPO_QUERY, parameters("name", repository_name)));
         }
-
     }
 
-
-    @Override
     public Iterator<IRepository> getIterator() {
-        return null; }
-
-//    private Path getRepoPath(final String name) {
-//
-//        return repository_path.resolve(name);
-//    }
-
-    ////////////////// private and protected methods //////////////////
-
+        return null;
+    }
 
     private void createRepositoryInNeo(String name) throws RepositoryException {
 
         if (repositoryExists(name)) {
-            throw new RepositoryException("Repo: " + name + " already exists" );
+            throw new RepositoryException("Repo: " + name + " already exists");
         }
 
-        try ( Session session = bridge.getNewSession() )
-        {
+        try (Session session = bridge.getNewSession()) {
             session.writeTransaction(tx -> tx.run(CREATE_REPO_QUERY, parameters("name", name)));
         }
     }
