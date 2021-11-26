@@ -17,10 +17,8 @@
 
 -->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven .apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <!-- dummy comment -->
 
     <parent>
         <groupId>uk.ac.standrews.cs</groupId>
@@ -38,7 +36,7 @@
 
     <properties>
 
-       <commons-lang3-version>3.12.0</commons-lang3-version>
+        <commons-lang3-version>3.12.0</commons-lang3-version>
 
     </properties>
 
@@ -74,21 +72,37 @@
     </dependencies>
 
     <build>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
 
-                <!-- Temporarily suppress tests until they're made self-contained. -->
+                <!-- Don't run tests by default since they depend on neo4j being installed. -->
                 <configuration>
-                    <excludes>
-                        <exclude>*uk.ac.standrews.cs.neoStorr.impl*/*Test.java</exclude>
-                    </excludes>
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>enable-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+
+                        <configuration>
+                            <skipTests>false</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>  

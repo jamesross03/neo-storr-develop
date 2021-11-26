@@ -4,3 +4,4 @@ syntax: glob
 *.iml
 target
 .idea
+.idea/libraries

@@ -37,12 +37,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     private static LXPMetadata static_md;
 
     static {
-        try {
             static_md = new LXPMetadata(LXPReference.class, "LXPReference");
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
@@ -88,7 +83,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
 
     private LXPReference(IStore store, String repo_name, String bucket_name, T reference) {
         this(repo_name, bucket_name, reference.getId());
-        ref = new WeakReference<T>(reference);   // TODO was weakRef - make softRef??
+        ref = new WeakReference<>(reference);   // TODO was weakRef - make softRef??
     }
 
     public LXPReference(LXP record) {
@@ -112,16 +107,15 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         return (long) get(OID);
     }
 
-    public LXP getReferend() throws RepositoryException, BucketException {
-        IBucket b = getBucket();
-        return getReferend( b );
-    }
+    public LXP getReferend() throws BucketException, RepositoryException {
 
+        return getReferend(getBucket());
+    }
 
     public T getReferend(Class clazz) throws BucketException, RepositoryException {
 
-        IBucket<T> b = getBucket(clazz);
-        return getReferend(b);
+        // TODO class is ignored if this reference was created using an explicit reference.
+        return getReferend(getBucket(clazz));
     }
 
     private T getReferend(IBucket<T> b) throws BucketException {
@@ -135,25 +129,25 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         }
         try {
             T result = b.getObjectById(getOid());
-            ref = new WeakReference<T>(result);  // cache the object we have just loaded.
+            ref = new WeakReference<>(result);  // cache the object we have just loaded.
             return result;
         } catch (StoreException e) {
             throw new BucketException(e);
         }
     }
 
-    public IBucket<T> getBucket(Class clazz) throws BucketException, RepositoryException {
-        if( ref != null ) {
+    private IBucket<T> getBucket(Class clazz) throws RepositoryException {
+        if (ref != null) {
             T obj = ref.get();
             if (obj != null) {
-                return getBucket(clazz);
+                return (IBucket<T>) obj.getBucket();
             }
         }
         return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), clazz);
     }
 
     public IBucket getBucket() throws RepositoryException {
-        if( ref != null ) {
+        if (ref != null) {
             LXP obj = ref.get();
             if (obj != null) {
                 return (IBucket) obj.getBucket();
@@ -168,7 +162,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         }
         if (obj instanceof LXPReference) {
             LXPReference sr = (LXPReference) obj;
-            return sr == this || sr.getOid().equals(this.getOid());
+            return sr == this || sr.getOid().equals(getOid());
         } else {
             return false;
         }

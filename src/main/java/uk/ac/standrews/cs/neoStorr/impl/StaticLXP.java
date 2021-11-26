@@ -46,7 +46,7 @@ public abstract class StaticLXP extends LXP {
 
     public StaticLXP(final long persistent_object_id, Map properties, final IBucket bucket) throws PersistentObjectException {
         super( persistent_object_id, bucket );
-        intialise_properties( properties );
+        initialiseProperties( properties );
         fixReferences();
     }
 

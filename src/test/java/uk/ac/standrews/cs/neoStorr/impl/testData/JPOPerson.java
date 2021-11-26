@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License along with neo-storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.neoStorr.impl;
+package uk.ac.standrews.cs.neoStorr.impl.testData;
 
-
+import uk.ac.standrews.cs.neoStorr.impl.JPO;
+import uk.ac.standrews.cs.neoStorr.impl.JPOMetadata;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.types.JPO_FIELD;
@@ -24,7 +25,7 @@ import uk.ac.standrews.cs.neoStorr.types.JPO_FIELD;
 import java.util.Map;
 import java.util.Objects;
 
-public class Person extends JPO {
+public class JPOPerson extends JPO {
 
     @JPO_FIELD
     private int age;
@@ -32,14 +33,14 @@ public class Person extends JPO {
     @JPO_FIELD
     public String address;
 
-    public Person() { // requirement for JPO
+    public JPOPerson() { // requirement for JPO
     }
 
-    public Person(long id, Map map, IBucket bucket ) throws PersistentObjectException { // a requirement for JPO
+    public JPOPerson(long id, Map map, IBucket bucket ) throws PersistentObjectException { // a requirement for JPO
         super(id, map, bucket);
     }
 
-    public Person(int age, String address) {
+    public JPOPerson(int age, String address) {
         this.age = age;
         this.address = address;
     }
@@ -48,7 +49,7 @@ public class Person extends JPO {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final Person person = (Person) o;
+        final JPOPerson person = (JPOPerson) o;
         return age == person.age &&
                 Objects.equals(address, person.address);
     }
@@ -67,14 +68,11 @@ public class Person extends JPO {
         return static_metadata;
     }
 
-
-
     static {
         try {
-            static_metadata = new JPOMetadata(Person.class,"JPOPerson");
+            static_metadata = new JPOMetadata(JPOPerson.class,"JPOPerson");
         } catch (Exception var1) {
             throw new RuntimeException(var1);
         }
     }
-
 }

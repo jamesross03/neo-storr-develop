@@ -41,7 +41,7 @@ public class DynamicLXP extends LXP {
 
     public DynamicLXP(final long persistent_object_id, Map<String,Object> properties, final IBucket bucket) throws PersistentObjectException {
         this(persistent_object_id, bucket);
-        intialise_properties( properties );
+        initialiseProperties( properties );
     }
 
     @Override

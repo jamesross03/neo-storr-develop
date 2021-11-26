@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU General Public License along with neo-storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.neoStorr.impl;
+package uk.ac.standrews.cs.neoStorr.impl.testData;
 
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.LXPReference;
+import uk.ac.standrews.cs.neoStorr.impl.StaticLXP;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
@@ -25,32 +28,29 @@ import uk.ac.standrews.cs.neoStorr.types.LXP_SCALAR;
 
 import java.util.Map;
 
-public class BBB extends StaticLXP {
+public class Person extends StaticLXP {
 
-    private static LXPMetadata static_metadata;
+    private static final LXPMetadata static_metadata;
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
     public static int FORENAME;
     @LXP_SCALAR(type = LXPBaseType.STRING)
     public static int SURNAME;
 
-    public BBB() {}
-
-    public BBB(long persistent_object_id, Map properties, IBucket bucket ) throws PersistentObjectException {
-        super( persistent_object_id, properties, bucket );
+    public Person() {
     }
 
-    public BBB(String forename, String surname ) {
-        this.put( BBB.FORENAME, forename );
-        this.put( BBB.SURNAME, surname );
+    public Person(long persistent_object_id, Map properties, IBucket bucket) throws PersistentObjectException {
+        super(persistent_object_id, properties, bucket);
     }
 
-    public static LXPReference<BBB> makeRef(String serialized ) {
-        return new LXPReference<>(serialized);
+    public Person(String forename, String surname) {
+        this.put(Person.FORENAME, forename);
+        this.put(Person.SURNAME, surname);
     }
 
-    public static BBB getRef(LXPReference<BBB> ref ) throws BucketException, RepositoryException {
-        return (BBB) ref.getReferend(BBB.class);
+    public static Person getRef(LXPReference<Person> ref) throws BucketException, RepositoryException {
+        return ref.getReferend(Person.class);
     }
 
     @Override
@@ -59,10 +59,6 @@ public class BBB extends StaticLXP {
     }
 
     static {
-        try {
-            static_metadata = new LXPMetadata(BBB.class, "BBB");
-        } catch (Exception var1) {
-            throw new RuntimeException(var1);
-        }
+        static_metadata = new LXPMetadata(Person.class, Person.class.getSimpleName());
     }
 }

@@ -70,7 +70,7 @@ public interface IBucket<T extends PersistentObject> {
 
     /**
      * @param cache_size - set the size of the object cache being implemented by the bucket
-     * @throws Exception if the cache size if smaller than the currently set cache size (i.e. cannot loose cached information
+     * @throws Exception if the cache size if smaller than the currently set cache size (i.e. cannot lose cached information
      */
     void setCacheSize( int cache_size ) throws Exception;
 
@@ -125,8 +125,6 @@ public interface IBucket<T extends PersistentObject> {
 
     /**
      * Sets the type of the bucket contents.
-     *
-     * @throws IOException if one occurs during the underlying operations.
      */
     void setPersistentTypeLabelID() throws IOException;
 

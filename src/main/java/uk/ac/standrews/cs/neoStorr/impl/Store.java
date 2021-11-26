@@ -170,7 +170,7 @@ public class Store implements IStore {
     @Override
     public void deleteRepository(String repository_name) throws RepositoryException {
         if (!repositoryExists(repository_name)) {
-            throw new RepositoryException("Bucket with " + repository_name + "does not exist");
+            throw new RepositoryException("Bucket " + repository_name + " does not exist");
         }
 
         repository_cache.remove(repository_name);

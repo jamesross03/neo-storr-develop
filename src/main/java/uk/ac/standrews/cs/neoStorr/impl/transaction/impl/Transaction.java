@@ -23,7 +23,6 @@ import uk.ac.standrews.cs.neoStorr.impl.NeoBackedBucket;
 import uk.ac.standrews.cs.neoStorr.impl.PersistentObject;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.StoreException;
-import uk.ac.standrews.cs.neoStorr.impl.transaction.exceptions.TransactionFailedException;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces.ITransaction;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 
@@ -36,54 +35,60 @@ import java.util.Map;
  */
 public class Transaction implements ITransaction {
 
-    private final TransactionManager transaction_manager;
     private final String transaction_id;
-    private org.neo4j.driver.Transaction tx;
     private final Session session;
     private final List<OverwriteRecord> undo_log = new ArrayList<>();
 
-    Transaction(TransactionManager transaction_manager) throws TransactionFailedException {
-        this.transaction_manager = transaction_manager;
-        transaction_id = Long.toString(Thread.currentThread().getId()); // TODO this is good enough for a single machine - need to do more work for multiple node support
+    private org.neo4j.driver.Transaction tx;
+
+    Transaction(TransactionManager transaction_manager) {
+
+        transaction_id = String.valueOf(Thread.currentThread().getId()); // TODO this is good enough for a single machine - need to do more work for multiple node support
         session = transaction_manager.getBridge().getNewSession();
         tx = session.beginTransaction();
     }
 
     @Override
-    public synchronized void commit() throws TransactionFailedException, StoreException {
+    public synchronized void commit() throws StoreException {
+
         tx.commit();
         close();
     }
 
     @Override
     public synchronized void rollback() throws IllegalStateException {
+
+        // TODO does it throw illegal state exception?
+
         tx.rollback();
-        for( OverwriteRecord undo_state : undo_log) {
-            
+        for (OverwriteRecord undo_state : undo_log) {
+
             LXP obj = undo_state.obj;
             NeoBackedBucket b = undo_state.bucket;
             LXPMetadata md = obj.getMetaData();
-            // replaces the state with that from the store
+
+            // Replace the state with that from the store.
 
             try {
                 PersistentObject shadow = b.loader(obj.getId());
                 Map<String, Object> undo_map = shadow.serializeFieldsToMap();
-                // Nw overwrite the fields of the in memory copy with the data from the store.
+                // Overwrite the fields of the in memory copy with the data from the store.
 
                 for (Map.Entry<String, Object> entry : undo_map.entrySet()) {
                     String field_name = entry.getKey();
-                    if( ! field_name.equals("STORR_ID") ) {
+                    if (!field_name.equals(LXP.STORR_ID_KEY)) {
                         obj.put(md.getSlot(field_name), undo_map.get(field_name));
                     }
                 }
             } catch (BucketException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         close();
     }
 
     private void close() {
+
         session.close();
         tx.close();
         tx = null;
@@ -91,23 +96,28 @@ public class Transaction implements ITransaction {
 
     @Override
     public synchronized void add(IBucket bucket, LXP lxp) {
+
+        // TODO exception if not active?
         if (isActive()) {
-            if( ! (bucket instanceof NeoBackedBucket ) ) {
-                throw new RuntimeException( "Transactions only support NeoBackedBuckets" );
+            if (!(bucket instanceof NeoBackedBucket)) {
+                throw new RuntimeException("Transactions only support NeoBackedBuckets");
             }
             undo_log.add(new OverwriteRecord((NeoBackedBucket) bucket, lxp));
         }
     }
 
     @Override
-    public boolean isActive() { return tx != null; }
+    public boolean isActive() {
+        return tx != null;
+    }
 
     @Override
-    public String getId() { return transaction_id; }
+    public String getId() {
+        return transaction_id;
+    }
 
     @Override
     public org.neo4j.driver.Transaction getNeoTransaction() {
         return tx;
     }
-
 }

@@ -28,32 +28,35 @@ import uk.ac.standrews.cs.neoStorr.types.LXPReferenceType;
 import uk.ac.standrews.cs.neoStorr.types.Types;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by al on 12/09/2014.
  */
 public class TypeFactory {
 
-    private static final String type_repo_name = "Types_repository";
-    private static final String type_Rep_bucket_name = "Type_reps";
-    private static final String type_names_bucket_name = "Type_names";
+    static final String TYPES_REPOSITORY_NAME = "Types_repository";
+    static final String TYPE_REPS_BUCKET_NAME = "Type_reps";
+    static final String TYPE_NAMES_BUCKET_NAME = "Type_names";
+    static final String NAME_FIELD_NAME = "name";
+    static final String KEY_FIELD_NAME = "key";
 
     private IBucket type_reps_bucket;
     private IBucket type_name_bucket;
     private IRepository type_repository;
     private IStore store;
 
-    private HashMap<String, IReferenceType> names_to_type_cache = new HashMap<>();
-    private HashMap<Long, IReferenceType> ids_to_type_cache = new HashMap<>();
+    private Map<String, IReferenceType> names_to_type_cache = new HashMap<>();
+    private Map<Long, IReferenceType> ids_to_type_cache = new HashMap<>();
 
     protected TypeFactory(final IStore store) throws RepositoryException {
 
         this.store = store;
 
-        setupTypeRepository(type_repo_name);
-        final boolean type_repo_initialised_already = type_repository.bucketExists(type_Rep_bucket_name);
-        type_reps_bucket = getBucket(type_Rep_bucket_name);
-        type_name_bucket = getBucket(type_names_bucket_name);
+        setupTypeRepository(TYPES_REPOSITORY_NAME);
+        final boolean type_repo_initialised_already = type_repository.bucketExists(TYPE_REPS_BUCKET_NAME);
+        type_reps_bucket = getBucket(TYPE_REPS_BUCKET_NAME);
+        type_name_bucket = getBucket(TYPE_NAMES_BUCKET_NAME);
         loadCaches();
 
         if (!type_repo_initialised_already) {
@@ -63,14 +66,16 @@ public class TypeFactory {
     }
 
     private void createAnyType() {
-        final DynamicLXP typerep = Types.getTypeRep(StaticLXP.class);
-        final LXPReferenceType lxp_type = new LXPReferenceType(typerep);
+
+        final DynamicLXP type_rep = Types.getTypeRep(StaticLXP.class);
+        final LXPReferenceType lxp_type = new LXPReferenceType(type_rep);
         doHousekeeping("lxp", lxp_type);
     }
 
     public IReferenceType createType(final Class c, final String type_name) {
-        final DynamicLXP typerep = Types.getTypeRep(c);
-        final LXPReferenceType ref_type = new LXPReferenceType(typerep);
+
+        final DynamicLXP type_rep = Types.getTypeRep(c);
+        final LXPReferenceType ref_type = new LXPReferenceType(type_rep);
         doHousekeeping(type_name, ref_type);
         return ref_type;
     }
@@ -98,8 +103,8 @@ public class TypeFactory {
         try {
             for (final DynamicLXP lxp : (Iterable<DynamicLXP>) type_name_bucket.getInputStream()) {
                 // as set up in @code nameValuePair below.
-                final String name = (String) lxp.get("name");
-                final long type_key = (long) lxp.get("key");
+                final String name = (String) lxp.get(NAME_FIELD_NAME);
+                final long type_key = (long) lxp.get(KEY_FIELD_NAME);
 
                 final LXP type_rep = (LXP) type_reps_bucket.getObjectById(type_key);
                 final LXPReferenceType reference = new LXPReferenceType((DynamicLXP) (type_rep));
@@ -132,12 +137,12 @@ public class TypeFactory {
         ids_to_type_cache.put(ref_type.getId(), ref_type);
     }
 
-    private LXP nameValuePair(final String type_name, final long typekey) {
+    private LXP nameValuePair(final String type_name, final long type_key) {
 
         final DynamicLXP lxp = new DynamicLXP();
 
-        lxp.put("name", type_name);
-        lxp.put("key", typekey);
+        lxp.put(NAME_FIELD_NAME, type_name);
+        lxp.put(KEY_FIELD_NAME, type_key);
 
         return lxp;
     }

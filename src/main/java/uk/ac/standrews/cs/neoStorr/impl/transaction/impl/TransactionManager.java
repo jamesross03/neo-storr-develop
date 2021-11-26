@@ -17,13 +17,14 @@
 package uk.ac.standrews.cs.neoStorr.impl.transaction.impl;
 
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.neoStorr.impl.transaction.exceptions.TransactionFailedException;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces.ITransaction;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces.ITransactionManager;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.util.NeoDbCypherBridge;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by al on 05/01/15.
@@ -31,16 +32,14 @@ import java.util.HashMap;
 public class TransactionManager implements ITransactionManager {
 
     private final IStore store;
-    private HashMap<String, ITransaction> map = new HashMap<>();
-
+    private final Map<String, ITransaction> map = Collections.synchronizedMap(new HashMap<>());
 
     public TransactionManager(final IStore store) throws RepositoryException {
-
         this.store = store;
     }
 
     @Override
-    public ITransaction beginTransaction() throws TransactionFailedException {
+    public ITransaction beginTransaction() {
 
         final Transaction t = new Transaction(this);
         map.put(t.getId(), t);

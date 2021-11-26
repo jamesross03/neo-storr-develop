@@ -18,32 +18,48 @@ package uk.ac.standrews.cs.neoStorr.impl;
 
 import org.junit.After;
 import org.junit.Before;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.StoreException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
+import static org.junit.Assert.assertFalse;
 
 public abstract class CommonTest {
 
-    static final String REPOSITORY_NAME = "TEST_REPO";
+    static final String REPOSITORY_NAME = "REPO_3465987345";
+    static final String BUCKET_NAME = "BUCKET_324895733346";
 
     protected IStore store;
     protected IRepository repository;
 
+    public static void main(String[] args) throws RepositoryException {
+
+        // Run this to delete existing repository.
+        IStore store = Store.getInstance();
+        if (store.repositoryExists(REPOSITORY_NAME)) {
+            store.deleteRepository(REPOSITORY_NAME);
+        }
+        System.exit(0);
+    }
+
     @Before
-    public void setUp() throws RepositoryException, IOException, StoreException, URISyntaxException, BucketException {
+    public void setUp() throws Exception {
 
         store = Store.getInstance();
 
-        try {
-            repository = store.getRepository(REPOSITORY_NAME);
-        } catch( Exception e ) {
-            repository = store.makeRepository(REPOSITORY_NAME);
-        }
+        // Clean up in case of any previous incomplete cleaning.
+        if (store.repositoryExists(REPOSITORY_NAME)) store.deleteRepository(REPOSITORY_NAME);
+
+        repository = store.makeRepository(REPOSITORY_NAME);
+        repository.makeBucket(BUCKET_NAME);
+    }
+
+    @After
+    public void tearDown() throws RepositoryException {
+
+        repository.deleteBucket(BUCKET_NAME);
+        store.deleteRepository(REPOSITORY_NAME);
+
+        assertFalse(store.repositoryExists(REPOSITORY_NAME));
     }
 }

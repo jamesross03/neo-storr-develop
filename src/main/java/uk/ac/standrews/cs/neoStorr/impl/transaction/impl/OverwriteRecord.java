@@ -27,11 +27,8 @@ public class OverwriteRecord {
     public NeoBackedBucket bucket;
     public LXP obj;
 
-    public <T extends LXP> OverwriteRecord(NeoBackedBucket bucket, LXP obj) {
+    public OverwriteRecord(NeoBackedBucket bucket, LXP obj) {
         this.bucket = bucket;
         this.obj = obj;
     }
-
-
-
 }

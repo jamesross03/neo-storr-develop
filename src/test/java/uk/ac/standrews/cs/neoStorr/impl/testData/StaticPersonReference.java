@@ -14,29 +14,32 @@
  * You should have received a copy of the GNU General Public License along with neo-storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.neoStorr.impl;
+package uk.ac.standrews.cs.neoStorr.impl.testData;
 
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.StaticLXP;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.types.LXP_REF;
 
 import java.util.Map;
 
-public class AClassContainingBBBRef extends StaticLXP {
+public class StaticPersonReference extends StaticLXP {
 
-    private static LXPMetadata static_metadata;
+    private static final LXPMetadata static_metadata;
 
-    @LXP_REF(type = "BBB")
+    @LXP_REF(type = "Person")
     public static int MY_FIELD;
 
-    public AClassContainingBBBRef() {}
-
-    public AClassContainingBBBRef(BBB b) throws PersistentObjectException {
-        this.put(AClassContainingBBBRef.MY_FIELD, b.getThisRef() );
+    public StaticPersonReference() {
     }
 
-    public AClassContainingBBBRef(long persistent_object_id, Map properties, IBucket bucket ) throws PersistentObjectException {
-        super( persistent_object_id, properties, bucket );
+    public StaticPersonReference(Person p) throws PersistentObjectException {
+        put(MY_FIELD, p.getThisRef());
+    }
+
+    public StaticPersonReference(long persistent_object_id, Map properties, IBucket bucket) throws PersistentObjectException {
+        super(persistent_object_id, properties, bucket);
     }
 
     @Override
@@ -45,11 +48,6 @@ public class AClassContainingBBBRef extends StaticLXP {
     }
 
     static {
-        try {
-            static_metadata = new LXPMetadata(AClassContainingBBBRef.class, "AClassContainingBBBRef");
-        } catch (Exception var1) {
-            throw new RuntimeException(var1);
-        }
+        static_metadata = new LXPMetadata(StaticPersonReference.class, StaticPersonReference.class.getSimpleName());
     }
-
 }

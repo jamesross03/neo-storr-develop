@@ -33,6 +33,8 @@ import java.util.*;
  */
 public abstract class LXP extends PersistentObject {
 
+    public static final String STORR_ID_KEY = "STORR_ID";
+
     LXPMetadata metadata = new LXPMetadata(); // field not used in Static LXP instances
 
     private final static int INITIAL_SIZE = 5;
@@ -49,7 +51,7 @@ public abstract class LXP extends PersistentObject {
     }
 
     public LXP(long object_id, IBucket bucket) {
-        super( object_id,bucket );
+        super(object_id, bucket);
     }
 
     // Abstract methods
@@ -329,7 +331,7 @@ public abstract class LXP extends PersistentObject {
     /**
      * A setter method over labelled values in the LXP
      *
-     * @param slot - the slot number of the required field
+     * @param slot  - the slot number of the required field
      * @param value - the list to associated with the @param label
      */
     public void put(final int slot, final List value) {
@@ -393,7 +395,6 @@ public abstract class LXP extends PersistentObject {
 
     // JSON Manipulation - write methods
 
-
     @Override
     public void serializeToJSON(final JSONWriter writer) throws JSONException {
 
@@ -410,8 +411,8 @@ public abstract class LXP extends PersistentObject {
             writer.key(key);
             Object value = null;
             try {
-                  value = field_storage[i];
-            } catch( IndexOutOfBoundsException e ) {
+                value = field_storage[i];
+            } catch (IndexOutOfBoundsException e) {
                 // if the static LXP has been dynamically created - e.g.
                 // during type conversion, not all storage fields may exist
                 // so much accomodate for that.
@@ -433,16 +434,15 @@ public abstract class LXP extends PersistentObject {
     }
 
     @Override
-    public Map<String,Object> serializeFieldsToMap()  {
+    public Map<String, Object> serializeFieldsToMap() {
 
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < getMetaData().getFieldCount(); i++) {
             final String key = getMetaData().getFieldName(i);
             try {
                 final Object value = field_storage[i];
                 addValueToMap(map, key, value);
-            }
-            catch( IndexOutOfBoundsException e ) {
+            } catch (IndexOutOfBoundsException e) {
                 // can occur if fields are missing - dynamic instantiation.
                 // don't do anything.
             }
@@ -451,24 +451,23 @@ public abstract class LXP extends PersistentObject {
     }
 
     private void addValueToMap(final Map<String, Object> map, String key, Object value) {
-        if( value instanceof LXPReference ) {
-            map.put( key,value.toString() );
+        if (value instanceof LXPReference) {
+            map.put(key, value.toString());
         } else if (value instanceof LXP) {
             addReferenceToMap(map, key, (LXP) value);
         } else {
-            map.put( key,value );
+            map.put(key, value);
         }
     }
 
     private void addReferenceToMap(Map<String, Object> map, String key, LXP value) {
         try {
             final IStoreReference reference = value.getThisRef();
-            map.put( key,reference.toString() );
+            map.put(key, reference.toString());
         } catch (final PersistentObjectException e) {
             throw new JSONException("Cannot serialise reference");
         }
     }
-
 
     private static void writeReference(final JSONWriter writer, final LXP value) {
 
@@ -518,38 +517,16 @@ public abstract class LXP extends PersistentObject {
         return null;
     }
 
-    private void readArray(final JSONReader reader, final String key) throws JSONException, PersistentObjectException, BucketException {
+    // readArray(final JSONReader reader, final String key) deleted 24/11/21.
 
-        reader.nextSymbol(); // eat the array symbol
-        final List list = new ArrayList();
-
-        while (!reader.have(JSONReader.ENDARRAY)) {
-
-            final Object value = readValue(reader);
-
-            if (value != null) {
-                list.add(value);
-            } else {
-                throw new PersistentObjectException("Unexpected type in JSON Array");
-            }
-        }
-        reader.nextSymbol(); // eat the end array
-
-        if (reader.have(JSONReader.COMMA)) {
-            reader.nextSymbol(); // eat the comma
-        }
-
-        put(key, list);
-    }
-
-    void intialise_properties( Map<String,Object> properties ) throws JSONException, PersistentObjectException {
+    void initialiseProperties(Map<String, Object> properties) throws JSONException {
 
         final Map<String, Integer> field_name_to_slot = getMetaData().getFieldNamesToSlotNumbers();
 
-        for( Map.Entry<String, Object> entry : properties.entrySet()) {
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
 
             final String key = entry.getKey(); // keep the keys identical whenever possible.
-            if( ! key.equals( "STORR_ID") ) { // these are not for public consumption - used in Neo to store storr id
+            if (!key.equals(STORR_ID_KEY)) { // these are not for public consumption - used in Neo to store storr id
                 final Object value = entry.getValue();
 
                 if (value != null) {

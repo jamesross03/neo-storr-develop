@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License along with neo-storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.neoStorr.impl;
+package uk.ac.standrews.cs.neoStorr.impl.testData;
 
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.StaticLXP;
 import uk.ac.standrews.cs.neoStorr.types.LXPBaseType;
 import uk.ac.standrews.cs.neoStorr.types.LXP_SCALAR;
 
-public class DDD extends StaticLXP {
+public class Car extends StaticLXP {
 
-    private static LXPMetadata static_metadata;
+    private static final LXPMetadata static_metadata;
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
-    public static int FORENAME;
-    @LXP_SCALAR(type = LXPBaseType.STRING)
-    public static int SURNAME;
+    public static int MODEL;
 
     @Override
     public LXPMetadata getMetaData() {
@@ -35,7 +35,7 @@ public class DDD extends StaticLXP {
 
     static {
         try {
-            static_metadata = new LXPMetadata(DDD.class, "DDD");
+            static_metadata = new LXPMetadata(Car.class, Car.class.getSimpleName());
         } catch (Exception var1) {
             throw new RuntimeException(var1);
         }

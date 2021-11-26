@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU General Public License along with neo-storr. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package uk.ac.standrews.cs.neoStorr.impl;
+package uk.ac.standrews.cs.neoStorr.impl.testData;
 
+import uk.ac.standrews.cs.neoStorr.impl.DynamicLXP;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 
-public class DynamicLXPWithRef extends DynamicLXP {
+public class DynamicPersonReference extends DynamicLXP {
 
-    public DynamicLXPWithRef(BBB b) throws PersistentObjectException {
-        this.put("A_REF", b.getThisRef() );
+    public static final String REFERENCE_FIELD_NAME = "A_REF";
+
+    public DynamicPersonReference(Person b) throws PersistentObjectException {
+        put(REFERENCE_FIELD_NAME, b.getThisRef() );
     }
-
 }

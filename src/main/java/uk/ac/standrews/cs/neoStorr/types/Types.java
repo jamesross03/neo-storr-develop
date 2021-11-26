@@ -25,15 +25,12 @@ import uk.ac.standrews.cs.neoStorr.impl.exceptions.KeyNotFoundException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.TypeMismatchFoundException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
-import uk.ac.standrews.cs.neoStorr.interfaces.IStoreReference;
 import uk.ac.standrews.cs.neoStorr.interfaces.IType;
-import uk.ac.standrews.cs.utilities.archive.ErrorHandling;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -99,7 +96,6 @@ public class Types {
         for (String label : required_labels) {
             if (!record_keys.contains(label)) {
                 // required label not present
-                ErrorHandling.error( "required label " + label + " not present in record " );
                 return false;
             }
             // required label is present now check the types of the keys in the record
@@ -108,12 +104,8 @@ public class Types {
 
                 if (!ref_type.getFieldType(label).valueConsistentWithType(value)) {
                     // label does not match expected type
-                    ErrorHandling.error( "label " + label + " type " + ref_type.getFieldType(label) + " inconsistent with value " + value + " in record " + record );
                     return false;
                 }
-            } catch (KeyNotFoundException e) {
-                // should never happen...
-                return false;
             } catch (TypeMismatchFoundException e) {
                 // type mismatch
                 return false;
@@ -158,19 +150,19 @@ public class Types {
 
         TypeFactory type_factory = store.getTypeFactory();
 
-        if (LXPBaseType.STRING.name().toLowerCase().equals(value.toLowerCase())) {
+        if (LXPBaseType.STRING.name().equalsIgnoreCase(value)) {
             return LXPBaseType.STRING;
         }
-        if (LXPBaseType.LONG.name().toLowerCase().equals(value.toLowerCase())) {
+        if (LXPBaseType.LONG.name().equalsIgnoreCase(value)) {
             return LXPBaseType.LONG;
         }
-        if (LXPBaseType.INT.name().toLowerCase().equals(value.toLowerCase())) {
+        if (LXPBaseType.INT.name().equalsIgnoreCase(value)) {
             return LXPBaseType.INT;
         }
-        if (LXPBaseType.DOUBLE.name().toLowerCase().equals(value.toLowerCase())) {
+        if (LXPBaseType.DOUBLE.name().equalsIgnoreCase(value)) {
             return LXPBaseType.DOUBLE;
         }
-        if (LXPBaseType.BOOLEAN.name().toLowerCase().equals(value.toLowerCase())) {
+        if (LXPBaseType.BOOLEAN.name().equalsIgnoreCase(value)) {
             return LXPBaseType.BOOLEAN;
         }
         if( value.startsWith("STOREREF[") && value.endsWith("]")) { // it is a ref type
@@ -184,11 +176,11 @@ public class Types {
         }
         if (value.startsWith("[") && value.endsWith("]")) { // it is a list type
             String listcontents = value.substring(1, value.length() - 1);
-            if (LXPBaseType.STRING.name().toLowerCase().equals(listcontents.toLowerCase()) ||
-                    LXPBaseType.LONG.name().toLowerCase().equals(listcontents.toLowerCase()) ||
-                    LXPBaseType.INT.name().toLowerCase().equals(listcontents.toLowerCase()) ||
-                    LXPBaseType.DOUBLE.name().toLowerCase().equals(listcontents.toLowerCase()) ||
-                    LXPBaseType.BOOLEAN.name().toLowerCase().equals(listcontents.toLowerCase())) {
+            if (LXPBaseType.STRING.name().equalsIgnoreCase(listcontents) ||
+                    LXPBaseType.LONG.name().equalsIgnoreCase(listcontents) ||
+                    LXPBaseType.INT.name().equalsIgnoreCase(listcontents) ||
+                    LXPBaseType.DOUBLE.name().equalsIgnoreCase(listcontents) ||
+                    LXPBaseType.BOOLEAN.name().equalsIgnoreCase(listcontents)) {
                 return LXPListBaseType.valueOf(listcontents);
             } else {
                 // it may be a list of ref types
@@ -215,11 +207,9 @@ public class Types {
         }
     }
 
-
     public static DynamicLXP getLXPTypeRep(Class c) {
-        DynamicLXP type_rep = null;
 
-        type_rep = new DynamicLXP();
+        DynamicLXP type_rep = new DynamicLXP();
 
         Field[] fields = c.getDeclaredFields();
         for (Field f : fields) {
@@ -228,108 +218,53 @@ public class Types {
 
                 if (f.isAnnotationPresent(LXP_SCALAR.class)) {
                     if (f.isAnnotationPresent(LXP_REF.class) || f.isAnnotationPresent(LXP_LIST.class)) {
-                        ErrorHandling.error("Conflicting labels: " + f.getName()); // Graham wrote this :)
+                        throw new RuntimeException("Conflicting labels: " + f.getName());
                     }
                     LXP_SCALAR scalar_type = f.getAnnotation(LXP_SCALAR.class);
                     try {
                         f.setAccessible(true);
-                        String label_name = (String) f.getName();
+                        String label_name = f.getName();
                         type_rep.put(label_name, scalar_type.type().name());
                     } catch (IllegalKeyException e) {
-                        ErrorHandling.exceptionError(e, "Illegal key in label: " + f.getName());
+                        throw new RuntimeException("Illegal key in label: " + f.getName(), e);
                     }
                 } else if (f.isAnnotationPresent(LXP_REF.class)) {
                     if (f.isAnnotationPresent(LXP_LIST.class)) {
-                        ErrorHandling.error("Conflicting labels: " + f.getName());
+                        throw new RuntimeException("Conflicting labels: " + f.getName());
                     }
                     LXP_REF ref_type = f.getAnnotation(LXP_REF.class);
                     String ref_type_name = ref_type.type(); // this is the name of the type that the reference refers to
                     try {
                         f.setAccessible(true);
-                        String label_name = (String) f.getName();
+                        String label_name = f.getName();
                         type_rep.put( label_name, "STOREREF[" + ref_type_name + "]" );
                     } catch (IllegalKeyException e) {
-                        ErrorHandling.exceptionError(e, "Illegal key in label: " + f.getName());
+                        throw new RuntimeException("Illegal key in label: " + f.getName(), e);
                     }
                 } else if (f.isAnnotationPresent(LXP_LIST.class)) {
                     LXP_LIST list_type = f.getAnnotation(LXP_LIST.class);
                     try {
                         f.setAccessible(true);
-                        String label_name = (String) f.getName();
+                        String label_name = f.getName();
                         LXPBaseType basetype = list_type.basetype();
                         String reftype = list_type.reftype();
                         if (basetype == LXPBaseType.UNKNOWN && reftype.equals(LXP_LIST.UNSPECIFIED_REF_TYPE)) {      // none specified
                             // no type specified by user - this is an error
-                            ErrorHandling.error("Illegal access for label: no array types specified");
+                            throw new RuntimeException("Illegal access for label: no array types specified");
                         } else if (basetype != LXPBaseType.UNKNOWN && !reftype.equals(LXP_LIST.UNSPECIFIED_REF_TYPE)) { // both specified
                             // both base type and ref type specified by user - this is an error
-                            ErrorHandling.error("Illegal access for label: reftype and basetype for array contents specified");
+                            throw new RuntimeException("Illegal access for label: reftype and basetype for array contents specified");
                         } else if (basetype == LXPBaseType.UNKNOWN) {                  // Just got one specified by use - either are OK.
                             type_rep.put(label_name, "[" + reftype + "]");              // use the ref type
                         } else {
                             type_rep.put(label_name, "[" + basetype.name() + "]");  // use the basetype
                         }
                     } catch (IllegalKeyException e) {
-                        ErrorHandling.exceptionError(e, "Illegal key in label: " + f.getName());
+                        throw new RuntimeException("Illegal key in label: " + f.getName(), e);
                     }
                 }
-
             }
         }
         return type_rep;
     }
-
-    private static DynamicLXP getJPOType(Class c) {
-        DynamicLXP type_rep = null;
-
-        type_rep = new DynamicLXP();
-
-        while( c != null ) {
-
-            final Field[] fields = c.getDeclaredFields();
-
-            for (final Field field : fields) {
-
-                field.setAccessible(true);
-
-                if(! Modifier.isStatic(field.getModifiers() ) && field.isAnnotationPresent(JPO_FIELD.class) ) {
-
-                    String label_name = field.getName();
-                    Class type = field.getType();
-
-                    // Either a scalar or a ref or an array.
-
-                    if( type.getName().equals( "java.lang.String" ) ) {  // Strings are strings (objects)!
-                        type_rep.put( label_name, "STRING" );
-                    } else if(  type.getName().equals( "double" ) ) {
-                        type_rep.put( label_name, "DOUBLE" );
-                    } else if(  type.getName().equals( "long" ) ) {
-                        type_rep.put( label_name, "LONG" );
-                    } else if( type.getName().equals( "int" ) ) {
-                        type_rep.put( label_name, "INT" );
-                    } else if( IStoreReference.class.isAssignableFrom( type ) ) {  // Don't know how to make this tighter.
-//                        ParameterizedType pt = (ParameterizedType) type.getGenericSuperclass();
-//                        Type ref_type = pt.getActualTypeArguments()[0];
-                        type_rep.put(label_name, "STOREREF[" + type + "]");
-                    } else if( List.class.isAssignableFrom( type ) ) {
-//                        ParameterizedType pt = (ParameterizedType) type.getGenericSuperclass();
-//                        Type paramType = pt.getActualTypeArguments()[0];
-//                        String typeName = paramType.getTypeName();
-//                        type_rep.put(label_name, "[" + typeName + "]");
-                        type_rep.put(label_name, "[" + type + "]");
-                    } else {
-                        throw new RuntimeException( "Unrecognised class in JPO Object: " + c.getName() );
-                    }
-
-                }
-            }
-
-
-            c = c.getSuperclass(); // run up hierarchy filling in fields
-        }
-
-        return type_rep;
-    }
-
-
 }

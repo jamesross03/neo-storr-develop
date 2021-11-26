@@ -36,13 +36,13 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public PersistentObject() {      // don't know the repo or the bucket
-        this.$$$$id$$$$id$$$$ = getNextFreePID();
+        $$$$id$$$$id$$$$ = getNextFreePID();
     }
 
     public PersistentObject(final long object_id, final IBucket bucket) {
 
-        this.$$$$id$$$$id$$$$ = object_id;
-        this.$$$bucket$$$bucket$$$ = bucket;
+        $$$$id$$$$id$$$$ = object_id;
+        $$$bucket$$$bucket$$$ = bucket;
 
         // This constructor used when about to be filled in with values.
     }
@@ -63,7 +63,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
      */
     public void serializeToJSON(final JSONWriter writer, final IBucket bucket) throws JSONException {
 
-        this.$$$bucket$$$bucket$$$ = bucket;
+        $$$bucket$$$bucket$$$ = bucket;
         serializeToJSON(writer);
     }
 
@@ -83,16 +83,15 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
      */
     private static long getNextFreePID() {
 
-        long next_prn;
-        do {
-            next_prn = RANDOM.nextLong();
-        } while (next_prn <= 0);
-
-        return next_prn;
+        while (true) {
+            long next_random = RANDOM.nextLong();
+            if (next_random > 0) return next_random;
+        }
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) return true;
         if (!(o instanceof PersistentObject)) return false;
         PersistentObject that = (PersistentObject) o;
@@ -105,6 +104,6 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
     }
 
     public int compareTo(final PersistentObject o) {
-        return Long.compare(this.getId(), o.getId());
+        return Long.compare(getId(), o.getId());
     }
 }
