@@ -16,7 +16,7 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl.testData;
 
-import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetaData;
 import uk.ac.standrews.cs.neoStorr.impl.StaticLXP;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class StaticPersonReference extends StaticLXP {
 
-    private static final LXPMetadata static_metadata;
+    private static final LXPMetaData static_metadata;
 
     @LXP_REF(type = "Person")
     public static int MY_FIELD;
@@ -43,11 +43,11 @@ public class StaticPersonReference extends StaticLXP {
     }
 
     @Override
-    public LXPMetadata getMetaData() {
+    public LXPMetaData getMetaData() {
         return static_metadata;
     }
 
     static {
-        static_metadata = new LXPMetadata(StaticPersonReference.class, StaticPersonReference.class.getSimpleName());
+        static_metadata = new LXPMetaData(StaticPersonReference.class, StaticPersonReference.class.getSimpleName());
     }
 }

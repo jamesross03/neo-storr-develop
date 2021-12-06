@@ -16,12 +16,9 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl.testData;
 
-import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
-import uk.ac.standrews.cs.neoStorr.impl.LXPReference;
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetaData;
 import uk.ac.standrews.cs.neoStorr.impl.StaticLXP;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.types.LXPBaseType;
 import uk.ac.standrews.cs.neoStorr.types.LXP_SCALAR;
@@ -30,7 +27,7 @@ import java.util.Map;
 
 public class Person extends StaticLXP {
 
-    private static final LXPMetadata static_metadata;
+    private static final LXPMetaData static_metadata;
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
     public static int FORENAME;
@@ -49,16 +46,12 @@ public class Person extends StaticLXP {
         this.put(Person.SURNAME, surname);
     }
 
-    public static Person getRef(LXPReference<Person> ref) throws BucketException, RepositoryException {
-        return ref.getReferend(Person.class);
-    }
-
     @Override
-    public LXPMetadata getMetaData() {
+    public LXPMetaData getMetaData() {
         return static_metadata;
     }
 
     static {
-        static_metadata = new LXPMetadata(Person.class, Person.class.getSimpleName());
+        static_metadata = new LXPMetaData(Person.class, Person.class.getSimpleName());
     }
 }

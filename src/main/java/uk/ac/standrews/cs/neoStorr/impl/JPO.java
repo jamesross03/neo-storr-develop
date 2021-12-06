@@ -34,19 +34,19 @@ public abstract class JPO extends StaticLXP {
         super();
     }
 
-    public JPO(long object_id, IBucket bucket) {
+    public JPO(final long object_id, final IBucket bucket) {
         this.$$$$id$$$$id$$$$ = object_id;
         this.$$$bucket$$$bucket$$$ = bucket;
     }
 
-    public JPO(long object_id, Map properties, IBucket bucket) throws PersistentObjectException {
+    public JPO(final long object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
         super(object_id, properties, bucket);
     }
 
-    public abstract JPOMetadata getJPOMetaData();
+    public abstract JPOMetaData getJPOMetaData();
 
     @Override
-    public LXPMetadata getMetaData() {
+    public LXPMetaData getMetaData() {
         return getJPOMetaData();
     }
 
@@ -54,23 +54,21 @@ public abstract class JPO extends StaticLXP {
         return super.getThisRef();
     }
 
-    public void put(String key, Object value) {
+    public void put(final String key, Object value) {
 
-        JPOMetadata md = getJPOMetaData();
-        JPOField field = md.get(key);
+        final JPOMetaData md = getJPOMetaData();
+        final JPOField field = md.get(key);
 
-        if (field == null) {
-            throw new RuntimeException("key not found: " + key);
-        }
-        if (field.isList) {
-            if (value instanceof String && value.equals("null")) {
-                value = null;
-            }
-        } else if (field.isLXPRef) {
+        if (field == null) throw new RuntimeException("key not found: " + key);
+
+        if (field.is_list) {
+            if (value.equals("null")) value = null;
+
+        } else if (field.is_lxp_ref) {
             // check it is a string
-            if (!(value instanceof String)) {
+            if (!(value instanceof String))
                 throw new RuntimeException("Encountered store reference type not String encoded");
-            }
+
             String str_val = (String) value;
             if (str_val.equals("null")) {
                 value = null;
@@ -78,10 +76,12 @@ public abstract class JPO extends StaticLXP {
                 value = new LXPReference((String) value);
             }
         }
+
         try {
             FieldUtils.writeField(this, key, value, true);
+
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

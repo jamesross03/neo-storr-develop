@@ -67,7 +67,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
         serializeToJSON(writer);
     }
 
-    public abstract void serializeToJSON(JSONWriter writer) throws JSONException;
+    public abstract void serializeToJSON(final JSONWriter writer) throws JSONException;
 
     public abstract Map<String,Object> serializeFieldsToMap();
 
@@ -90,7 +90,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
 
         if (this == o) return true;
         if (!(o instanceof PersistentObject)) return false;

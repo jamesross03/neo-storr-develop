@@ -45,6 +45,7 @@ public class ObjectsWithReferencesTest extends CommonTest {
     public void setUp() throws Exception {
 
         super.setUp();
+        store.getTransactionManager().setAutoCommit(true);
 
         typed_bucket1 = repository.makeBucket(TYPED_BUCKET_NAME1, Person.class);
         typed_bucket2 = repository.makeBucket(TYPED_BUCKET_NAME2, StaticPersonReference.class);

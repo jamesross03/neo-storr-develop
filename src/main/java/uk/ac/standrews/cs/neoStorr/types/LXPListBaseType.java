@@ -29,141 +29,67 @@ public enum LXPListBaseType implements IType {
 
     UNKNOWN {
         @Override
-        public boolean valueConsistentWithType(Object value) {
+        public boolean valueConsistentWithType(final Object value) {
             throw new RuntimeException("Encountered ARRAY OF UNKNOWN type whilst checking field contents");
         }
     },
+
     STRING {
         @Override
-        public boolean valueConsistentWithType(Object value) {
-            if (value instanceof List) {
-                List list = (List) value;
-                if (list.isEmpty()) {
-                    return true; // cannot check contents due to type erasure - and is empty so OK.
-                } else {
-                    try {
-                        list.toArray(new String[list.size()]);
-                        // everything is type compatible
-                        return true;
-                    } catch (ArrayStoreException e) {
-                        // types don't match
-                        return false;
-                    }
-                }
-            } else {
-                return false;
-            }
+        public boolean valueConsistentWithType(final Object value) {
+            return check(value, new String[1]);
         }
     },
+
     INT {
         @Override
-        public boolean valueConsistentWithType(Object value) {
-            if (value instanceof List) {
-                List list = (List) value;
-                if (list.isEmpty()) {
-                    return true; // cannot check contents due to type erasure - and is empty so OK.
-                } else {
-                    try {
-                        list.toArray(new Integer[list.size()]);
-                        // everything is type compatible
-                        return true;
-                    } catch (ArrayStoreException e) {
-                        // types don't match
-                        return false;
-                    }
-                }
-            } else {
-                return false;
-            }
+        public boolean valueConsistentWithType(final Object value) {
+            return check(value, new Integer[1]);
         }
     },
+
     LONG {
         @Override
-        public boolean valueConsistentWithType(Object value) {
-            if (value instanceof List) {
-                List list = (List) value;
-                if (list.isEmpty()) {
-                    return true; // cannot check contents due to type erasure - and is empty so OK.
-                } else {
-                    try {
-                        list.toArray(new Long[list.size()]);
-                        // everything is type compatible
-                        return true;
-                    } catch (ArrayStoreException e) {
-                        // types don't match
-                        return false;
-                    }
-                }
-            } else {
-                return false;
-            }
+        public boolean valueConsistentWithType(final Object value) {
+            return check(value, new Long[1]);
         }
     },
+
     DOUBLE {
         @Override
-        public boolean valueConsistentWithType(Object value) {
-            if (value instanceof List) {
-                List list = (List) value;
-                if (list.isEmpty()) {
-                    return true; // cannot check contents due to type erasure - and is empty so OK.
-                } else {
-                    try {
-                        list.toArray(new Double[list.size()]);
-                        // everything is type compatible
-                        return true;
-                    } catch (ArrayStoreException e) {
-                        // types don't match
-                        return false;
-                    }
-                }
-            } else {
-                return false;
-            }
+        public boolean valueConsistentWithType(final Object value) {
+            return check(value, new Double[1]);
         }
     },
+
     BOOLEAN {
         @Override
-        public boolean valueConsistentWithType(Object value) {
-            if (value instanceof List) {
-                List list = (List) value;
-                if (list.isEmpty()) {
-                    return true; // cannot check contents due to type erasure - and is empty so OK.
-                } else {
-                    try {
-                        list.toArray(new Boolean[list.size()]);
-                        // everything is type compatible
-                        return true;
-                    } catch (ArrayStoreException e) {
-                        // types don't match
-                        return false;
-                    }
-                }
-            } else {
-                return false;
-            }
+        public boolean valueConsistentWithType(final Object value) {
+            return check(value, new Boolean[1]);
         }
     },
+
     REF {
         @Override
-        public boolean valueConsistentWithType(Object value) {
-            if (value instanceof List) {
-                List list = (List) value;
-                if (list.isEmpty()) {
-                    return true; // cannot check contents due to type erasure - and is empty so OK.
-                } else {
-                    try {
-                        list.toArray(new Long[list.size()]); // oids are longs
-                        // everything is type compatible
-                        return true;
-                    } catch (ArrayStoreException e) {
-                        // types don't match
-                        return false;
-                    }
-                }
-            } else {
+        public boolean valueConsistentWithType(final Object value) {
+            return check(value, new Long[1]);
+         }
+    };
+
+    private static boolean check(final Object value, final Object[] test_array) {
+
+        if (value instanceof List) {
+            final List list = (List) value;
+            if (list.isEmpty()) return true;
+
+            try {
+                list.toArray(test_array);
+                return true;
+            } catch (ArrayStoreException e) {
                 return false;
             }
         }
+        return false;
     }
 }
 

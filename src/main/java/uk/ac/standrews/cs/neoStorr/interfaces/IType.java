@@ -39,5 +39,4 @@ public interface IType {
      * valueConsistentWithType( 7.3 ) will yield false.
      */
     boolean valueConsistentWithType(Object value);
-
 }

@@ -16,7 +16,6 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.LXPException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
 import uk.ac.standrews.cs.neoStorr.types.LXP_LIST;
 import uk.ac.standrews.cs.neoStorr.types.LXP_REF;
@@ -29,20 +28,20 @@ import java.util.*;
 /**
  * Class to manage mappings between names and slot numbers in LXP.
  */
-public class LXPMetadata extends PersistentMetaData {
+public class LXPMetaData extends PersistentMetaData {
 
     private final Map<String, Integer> field_name_to_slot = new HashMap<>();
     private final Map<Integer, String> slot_to_field_name = new HashMap<>();
 
     private IReferenceType type = null;
 
-    LXPMetadata() {
+    LXPMetaData() {
         super();
     }
 
-    public LXPMetadata(final Class metadata_class, final String type_name) {
+    public LXPMetaData(final Class metadata_class, final String type_name) {
 
-        super(metadata_class,type_name);
+        super(metadata_class, type_name);
         initialiseMaps(metadata_class);
     }
 
@@ -66,7 +65,6 @@ public class LXPMetadata extends PersistentMetaData {
 
                     field_name_to_slot.put(field_name, slot_value);
                     slot_to_field_name.put(slot_value, field_name);
-
 
                 } catch (final IllegalAccessException e) {
                     throw new RuntimeException("Illegal access for label: " + field.getName());
@@ -147,14 +145,14 @@ public class LXPMetadata extends PersistentMetaData {
         return field_name_to_slot.keySet().size();
     }
 
-    public void setType(final IReferenceType suppliedType) throws LXPException {
+    public void setType(final IReferenceType suppliedType) {
 
         if (type == null) {
             // TODO put a modified call of Types.checkStructuralConsistency() in here to ensure type compatibility.
             // TODO need a similar call for dynamic creation of fields if type has been set.
             type = suppliedType;
         } else {
-            throw new LXPException("Type already defined");
+            throw new RuntimeException("Type already defined");
         }
     }
 }

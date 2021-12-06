@@ -29,7 +29,6 @@ public class NeoBackedInputStream<T extends PersistentObject> implements IInputS
     private final IBucket<T> bucket;
 
     NeoBackedInputStream(final IBucket<T> bucket) throws IOException {
-
         this.bucket = bucket;
     }
 
@@ -37,7 +36,7 @@ public class NeoBackedInputStream<T extends PersistentObject> implements IInputS
 
         return new Iterator<T>() {
 
-            private Iterator<Long> oid_iterator = bucket.getOids().iterator();
+            private final Iterator<Long> oid_iterator = bucket.getObjectIds().iterator();
 
             @Override
             public boolean hasNext() {

@@ -17,7 +17,6 @@
 package uk.ac.standrews.cs.neoStorr.impl;
 
 import org.json.JSONWriter;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.IllegalKeyException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 
@@ -31,6 +30,8 @@ import java.util.Map;
  */
 public class DynamicLXP extends LXP {
 
+    final LXPMetaData metadata = new LXPMetaData();
+
     public DynamicLXP() {
         super();
     }
@@ -40,27 +41,29 @@ public class DynamicLXP extends LXP {
     }
 
     public DynamicLXP(final long persistent_object_id, Map<String,Object> properties, final IBucket bucket) throws PersistentObjectException {
+
         this(persistent_object_id, bucket);
         initialiseProperties( properties );
     }
 
     @Override
-    public LXPMetadata getMetaData() {
+    public LXPMetaData getMetaData() {
         return metadata;
     }
 
 
     @Override
-    public void check(final String key) throws IllegalKeyException {
+    public void check(final String key) {
 
         if (key == null || key.equals("")) {
-            throw new IllegalKeyException("null key");
+            throw new RuntimeException("null key");
         }
 
         final Map<String, Integer> field_name_to_slot = metadata.getFieldNamesToSlotNumbers();
         final Map<Integer, String> slot_to_fieldname = metadata.getSlotNumbersToFieldNames();
 
         if (!field_name_to_slot.containsKey(key)) {
+
             final int next_slot = findFirstFree();
             field_name_to_slot.put(key, next_slot);
             slot_to_fieldname.put(next_slot, key);

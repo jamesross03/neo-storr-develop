@@ -17,8 +17,6 @@
 package uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces;
 
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.StoreException;
-import uk.ac.standrews.cs.neoStorr.impl.transaction.exceptions.TransactionFailedException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 
 /**
@@ -28,7 +26,7 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
  */
 public interface ITransaction {
 
-    void commit() throws TransactionFailedException, StoreException;
+    void commit();
 
     void rollback() throws IllegalStateException;
 

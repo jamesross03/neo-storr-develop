@@ -22,7 +22,7 @@ import uk.ac.standrews.cs.neoStorr.impl.PersistentObject;
 /**
  * Provides an input stream of labelled cross product records.
  * Does not implement any functionality other than that provided by Iterable.
- * Provided for competeness to match @class IOutputStream
+ * Provided for completeness to match @class IOutputStream
  *
  * @author al
  */

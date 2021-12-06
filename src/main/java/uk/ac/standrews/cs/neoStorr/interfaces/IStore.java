@@ -21,8 +21,6 @@ import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces.ITransactionManager;
 import uk.ac.standrews.cs.neoStorr.util.NeoDbCypherBridge;
 
-import java.util.Iterator;
-
 /**
  * This interface is used to encode the type of a Store within the system.
  * The Stores are implemented as a Hierarchy in which there is one instance of the Store (per node).
@@ -80,5 +78,5 @@ public interface IStore {
     /**
      * close the store
      */
-    void close() throws Exception;
+    void close();
 }

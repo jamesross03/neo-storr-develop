@@ -16,26 +16,26 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl.testData;
 
-import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetaData;
 import uk.ac.standrews.cs.neoStorr.impl.StaticLXP;
 import uk.ac.standrews.cs.neoStorr.types.LXPBaseType;
 import uk.ac.standrews.cs.neoStorr.types.LXP_SCALAR;
 
 public class Car extends StaticLXP {
 
-    private static final LXPMetadata static_metadata;
+    private static final LXPMetaData static_metadata;
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
     public static int MODEL;
 
     @Override
-    public LXPMetadata getMetaData() {
+    public LXPMetaData getMetaData() {
             return static_metadata;
     }
 
     static {
         try {
-            static_metadata = new LXPMetadata(Car.class, Car.class.getSimpleName());
+            static_metadata = new LXPMetaData(Car.class, Car.class.getSimpleName());
         } catch (Exception var1) {
             throw new RuntimeException(var1);
         }

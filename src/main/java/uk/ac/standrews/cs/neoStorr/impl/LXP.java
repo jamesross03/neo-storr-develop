@@ -18,11 +18,10 @@ package uk.ac.standrews.cs.neoStorr.impl;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.*;
+import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStoreReference;
-import uk.ac.standrews.cs.utilities.JSONReader;
 
 import java.util.*;
 
@@ -35,64 +34,49 @@ public abstract class LXP extends PersistentObject {
 
     public static final String STORR_ID_KEY = "STORR_ID";
 
-    LXPMetadata metadata = new LXPMetadata(); // field not used in Static LXP instances
-
-    private final static int INITIAL_SIZE = 5;
+    private static final int INITIAL_SIZE = 5;
     private static final int SIZE_INCREMENT = 5;
 
     private Object[] field_storage = new Object[INITIAL_SIZE];   // where the data lives in the LXP.
-
     private int next_free_slot = 0;
-
-    // Constructors
 
     public LXP() {
         super();
     }
 
-    public LXP(long object_id, IBucket bucket) {
+    public LXP(final long object_id, final IBucket bucket) {
         super(object_id, bucket);
     }
-
-    // Abstract methods
 
     /**
      * Checks to see if the given key is present in the lxp.
      * Dynamic classes are at liberty to add fields if required.
      *
      * @param key - a key to be checked
-     * @throws IllegalKeyException if the key is not present or illegal
+     * @throws RuntimeException if the key is not present or illegal
      */
-    public abstract void check(String key) throws IllegalKeyException;
+    public abstract void check(String key);
 
     /**
      * @return the metadata associated with the class extending LXP base.
      * This may be static or dynamically created.
      * Two classes are provided corresponding to the above.
      */
-    public abstract LXPMetadata getMetaData();
-
-    // Selectors
+    public abstract LXPMetaData getMetaData();
 
     /**
      * A getter method over labelled values in the LXPID
      *
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a String
      */
-    public Object get(final int slot) throws KeyNotFoundException {
+    public Object get(final int slot) {
 
         try {
             return field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         }
-    }
-
-    public int getFieldCount() {
-        return metadata.getFieldCount();
     }
 
     /**
@@ -100,17 +84,16 @@ public abstract class LXP extends PersistentObject {
      *
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a String
      */
-    public String getString(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public String getString(final int slot) {
 
         try {
             return (String) field_storage[slot];
+
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected String found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -119,17 +102,15 @@ public abstract class LXP extends PersistentObject {
      *
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a double
      */
-    public double getDouble(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public double getDouble(final int slot) {
 
         try {
             return (Double) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected double found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected double found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -137,17 +118,15 @@ public abstract class LXP extends PersistentObject {
      * A getter method over labelled values in the LXP
      *
      * @param slot - the slot number of the required field
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not an integer
      */
-    public int getInt(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public int getInt(final int slot) {
 
         try {
             return (Integer) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected int found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected int found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -156,17 +135,15 @@ public abstract class LXP extends PersistentObject {
      *
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a boolean
      */
-    public boolean getBoolean(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public boolean getBoolean(final int slot) {
 
         try {
             return (Boolean) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected boolean found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected boolean found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -175,17 +152,15 @@ public abstract class LXP extends PersistentObject {
      *
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a long
      */
-    public long getLong(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public long getLong(final int slot) {
 
         try {
             return (Long) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected Long found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected Long found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -194,17 +169,15 @@ public abstract class LXP extends PersistentObject {
      *
      * @param slot - the slot number of the required field
      * @return the list associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a long
      */
-    public List getList(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public List getList(final int slot) {
 
         try {
             return (List) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected String found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -213,17 +186,15 @@ public abstract class LXP extends PersistentObject {
      *
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
-     * @throws KeyNotFoundException       - if the tuple does not contain the key
-     * @throws TypeMismatchFoundException if the value associated with the key is not a Store reference
      */
-    public IStoreReference getRef(final int slot) throws KeyNotFoundException, TypeMismatchFoundException {
+    public IStoreReference getRef(final int slot) {
 
         try {
             return (IStoreReference) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
-            throw new KeyNotFoundException(slot);
+            throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new TypeMismatchFoundException("expected String found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -233,7 +204,7 @@ public abstract class LXP extends PersistentObject {
     public IStoreReference getThisRef() throws PersistentObjectException {
 
         if ($$$bucket$$$bucket$$$ == null) {
-            throw new PersistentObjectException("Null bucket encountered in LXP (uncommited LXP reference) : " + toString());
+            throw new PersistentObjectException("Null bucket encountered in LXP (uncommited LXP reference) : " + this);
         }
         return new LXPReference($$$bucket$$$bucket$$$.getRepository(), $$$bucket$$$bucket$$$, this);
     }
@@ -249,18 +220,15 @@ public abstract class LXP extends PersistentObject {
 
     /**
      * @return the value associated with the label supplied.
-     * @throws KeyNotFoundException if the label does not exist in the fieldmap.
      */
-    public Object get(final String label) throws KeyNotFoundException {
+    public Object get(final String label) {
 
         final Integer slot = getMetaData().getSlot(label);
         if (slot == null) {
-            throw new KeyNotFoundException("No field with name " + label + " in " + this.getId());
+            throw new RuntimeException("No field with name " + label + " in " + getId());
         }
         return field_storage[slot];
     }
-
-    //------------- Putters -------------
 
     /**
      * A setter method over labelled values in the LXP
@@ -410,13 +378,15 @@ public abstract class LXP extends PersistentObject {
             final String key = getMetaData().getFieldName(i);
             writer.key(key);
             Object value = null;
+
             try {
                 value = field_storage[i];
+
             } catch (IndexOutOfBoundsException e) {
                 // if the static LXP has been dynamically created - e.g.
                 // during type conversion, not all storage fields may exist
-                // so much accomodate for that.
             }
+
             if (value instanceof ArrayList) {
                 writer.array();
                 for (final Object o : (List) value) {
@@ -442,7 +412,8 @@ public abstract class LXP extends PersistentObject {
             try {
                 final Object value = field_storage[i];
                 addValueToMap(map, key, value);
-            } catch (IndexOutOfBoundsException e) {
+
+            } catch (IndexOutOfBoundsException ignored) {
                 // can occur if fields are missing - dynamic instantiation.
                 // don't do anything.
             }
@@ -450,7 +421,8 @@ public abstract class LXP extends PersistentObject {
         return map;
     }
 
-    private void addValueToMap(final Map<String, Object> map, String key, Object value) {
+    private void addValueToMap(final Map<String, Object> map, final String key, final Object value) {
+
         if (value instanceof LXPReference) {
             map.put(key, value.toString());
         } else if (value instanceof LXP) {
@@ -460,10 +432,11 @@ public abstract class LXP extends PersistentObject {
         }
     }
 
-    private void addReferenceToMap(Map<String, Object> map, String key, LXP value) {
+    private void addReferenceToMap(final Map<String, Object> map, final String key, final LXP value) {
+
         try {
-            final IStoreReference reference = value.getThisRef();
-            map.put(key, reference.toString());
+            map.put(key, value.getThisRef().toString());
+
         } catch (final PersistentObjectException e) {
             throw new JSONException("Cannot serialise reference");
         }
@@ -472,8 +445,8 @@ public abstract class LXP extends PersistentObject {
     private static void writeReference(final JSONWriter writer, final LXP value) {
 
         try {
-            final IStoreReference reference = value.getThisRef();
-            writer.value(reference.toString());
+            writer.value(value.getThisRef().toString());
+
         } catch (final PersistentObjectException e) {
             throw new JSONException("Cannot serialise reference");
         }
@@ -494,48 +467,25 @@ public abstract class LXP extends PersistentObject {
         }
     }
 
-    // JSON Manipulation - read methods
-
-    private static Object readValue(final JSONReader reader) throws JSONException {
-
-        if (reader.have(JSONReader.LONG)) {
-            return reader.longValue();
-        }
-        if (reader.have(JSONReader.INTEGER)) {
-            return reader.intValue();
-        }
-        if (reader.have(JSONReader.DOUBLE)) {
-            return reader.doubleValue();
-        }
-        if (reader.have(JSONReader.STRING)) {
-            return reader.stringValue().intern(); // keep the Strings the same whenever possible.
-        }
-        if (reader.have(JSONReader.BOOLEAN)) {
-            return reader.booleanValue();
-        }
-
-        return null;
-    }
-
-    // readArray(final JSONReader reader, final String key) deleted 24/11/21.
-
-    void initialiseProperties(Map<String, Object> properties) throws JSONException {
+    void initialiseProperties(final Map<String, Object> properties) throws JSONException {
 
         final Map<String, Integer> field_name_to_slot = getMetaData().getFieldNamesToSlotNumbers();
 
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+        for (final Map.Entry<String, Object> entry : properties.entrySet()) {
 
             final String key = entry.getKey(); // keep the keys identical whenever possible.
+
             if (!key.equals(STORR_ID_KEY)) { // these are not for public consumption - used in Neo to store storr id
                 final Object value = entry.getValue();
 
                 if (value != null) {
                     check(key);
                     put(field_name_to_slot.get(key), value);
+
                 } else {
                     // can occur if dynamically constructed and data has missing field values.
                     // also for null refs
-                    put(field_name_to_slot.get(key), value);
+                    put(field_name_to_slot.get(key), (Object) null);
                 }
             }
         }

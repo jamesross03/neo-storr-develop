@@ -19,7 +19,6 @@ package uk.ac.standrews.cs.neoStorr.interfaces;
 import uk.ac.standrews.cs.neoStorr.impl.PersistentObject;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -70,9 +69,9 @@ public interface IBucket<T extends PersistentObject> {
 
     /**
      * @param cache_size - set the size of the object cache being implemented by the bucket
-     * @throws Exception if the cache size if smaller than the currently set cache size (i.e. cannot lose cached information
+     * @throws BucketException if the cache size if smaller than the currently set cache size (i.e. cannot lose cached information
      */
-    void setCacheSize( int cache_size ) throws Exception;
+    void setCacheSize(int cache_size) throws BucketException;
 
     /**
      * @return the size of the object cache being implemented by the bucket
@@ -93,7 +92,7 @@ public interface IBucket<T extends PersistentObject> {
     /**
      * @return the oids of the records that are in this bucket
      */
-    List<Long> getOids();
+    List<Long> getObjectIds();
 
     /**
      * @return the name of the bucket
@@ -126,7 +125,7 @@ public interface IBucket<T extends PersistentObject> {
     /**
      * Sets the type of the bucket contents.
      */
-    void setPersistentTypeLabelID() throws IOException;
+    void setPersistentTypeLabelID() throws BucketException;
 
     /**
      * Used to invalidate cached information when updates to underlying data structures are updated

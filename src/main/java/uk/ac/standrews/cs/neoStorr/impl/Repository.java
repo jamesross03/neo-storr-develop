@@ -19,19 +19,19 @@ package uk.ac.standrews.cs.neoStorr.impl;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.types.Node;
+import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.util.NeoDbCypherBridge;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.neo4j.driver.Values.parameters;
 
 /**
- * A Collection of buckets identified by a file path representing its root.
+ * A Collection of buckets.
  * Created by al on 11/05/2014.
  */
 public class Repository implements IRepository {
@@ -54,7 +54,7 @@ public class Repository implements IRepository {
     private final Map<String, NeoBackedBucket> bucket_cache;
     private final NeoDbCypherBridge bridge;
 
-    Repository(IStore store, String repository_name) throws RepositoryException {
+    Repository(final IStore store, final String repository_name) throws RepositoryException {
 
         if (!repositoryNameIsLegal(repository_name)) {
             throw new RepositoryException("Illegal repository name <" + repository_name + ">");
@@ -76,7 +76,7 @@ public class Repository implements IRepository {
     }
 
     @Override
-    public <T extends LXP> IBucket<T> makeBucket(final String bucket_name, Class<T> bucketType) throws RepositoryException, IOException {
+    public <T extends LXP> IBucket<T> makeBucket(final String bucket_name, final Class<T> bucketType) throws RepositoryException, BucketException {
 
         makeBucketInNeo(bucket_name); // Throws exception if it already exists in Db
         NeoBackedBucket<T> bucket = new NeoBackedBucket<>(this, bucket_name, getNeoBucketIDFromDb(bucket_name), bucketType);
@@ -89,63 +89,44 @@ public class Repository implements IRepository {
      * @param bucket_name the name of the bucket to create
      * @throws RepositoryException
      */
-    private void makeBucketInNeo(String bucket_name) throws RepositoryException {
-        if (bucketExists(bucket_name)) {
-            throw new RepositoryException("Repo: " + bucket_name + " already exists");
-        }
+    private void makeBucketInNeo(final String bucket_name) throws RepositoryException {
 
-        try (Session session = bridge.getNewSession()) {
-            session.writeTransaction(tx -> tx.run(MAKE_BUCKET_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name)));
+        if (bucketExists(bucket_name)) throw new RepositoryException("Repo: " + bucket_name + " already exists");
+
+        try (final Session session = bridge.getNewSession()) {
+            session.writeTransaction(tx -> tx.run(MAKE_BUCKET_QUERY, parameters("repo_name", repository_name, "bucket_name", bucket_name)));
         }
     }
 
     @Override
     public boolean bucketExists(final String bucket_name) {
 
-        try (Session s = bridge.getNewSession()) {
-            Result result = s.run(BUCKET_EXISTS_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
-            if (result == null) {
-                return false;
-            }
+        try (final Session s = bridge.getNewSession()) {
+
+            Result result = s.run(BUCKET_EXISTS_QUERY, parameters("repo_name", repository_name, "bucket_name", bucket_name));
+
             List<Node> nodes = result.list(r -> r.get("b").asNode());
             return nodes.size() == 1;
         }
     }
 
-    public long getNeoBucketID(final String bucket_name) throws RepositoryException {
-
-        NeoBackedBucket bucket = bucket_cache.get(bucket_name);
-        if (bucket != null) {
-            return bucket.getNeoId();
-        }
-
-        if (bucketExists(bucket_name)) {
-            bucket = (NeoBackedBucket) makeBucket(bucket_name);  // has side effect of caching the bucket
-            return bucket.getNeoId();
-        }
-
-        throw new RepositoryException("getNeoBucketID: Bucket id not found for: " + bucket_name);
-    }
-
     public long getNeoBucketIDFromDb(final String bucket_name) throws RepositoryException {
 
-        try (Session s = bridge.getNewSession()) {
+        try (final Session s = bridge.getNewSession()) {
+
             Result result = s.run(BUCKET_EXISTS_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name));
-            if (result == null) {
-                throw new RepositoryException("getNeoBucketID: (1) Bucket id not found for: " + bucket_name);
-            }
+
             List<Node> nodes = result.list(r -> r.get("b").asNode());
-            if (nodes.size() != 1) {
-                throw new RepositoryException("getNeoBucketID: (2) Bucket id not found for: " + bucket_name);
-            }
+            if (nodes.isEmpty()) throw new RepositoryException("Bucket id not found for: " + bucket_name);
+
             return nodes.get(0).id();
         }
     }
 
     @Override
-    public void deleteBucket(final String bucket_name) throws RepositoryException {
+    public void deleteBucket(final String bucket_name) {
 
-        try (Session session = bridge.getNewSession();) {
+        try (final Session session = bridge.getNewSession();) {
             session.writeTransaction(tx -> tx.run(DELETE_BUCKET_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name)));
         }
         bucket_cache.remove(bucket_name);
@@ -155,11 +136,10 @@ public class Repository implements IRepository {
     public IBucket getBucket(final String bucket_name) throws RepositoryException {
 
         final IBucket bucket = bucket_cache.get(bucket_name);
-        if (bucket != null) {
-            return bucket;
-        } else if (bucketExists(bucket_name)) {
-            return new NeoBackedBucket(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
-        }
+        if (bucket != null) return bucket;
+
+        if (bucketExists(bucket_name)) return new NeoBackedBucket(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
+
         throw new RepositoryException("bucket does not exist with name: <" + bucket_name + ">");
     }
 
@@ -169,19 +149,18 @@ public class Repository implements IRepository {
         final IBucket bucket = bucket_cache.get(bucket_name);
 
         if (bucket != null) {
-            if (((NeoBackedBucket) bucket).bucketTypeIsCorrect(bucketType)) {
-                return bucket;
-            } else {
-                throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
-            }
+            if (((NeoBackedBucket) bucket).bucketTypeIsCorrect(bucketType)) return bucket;
+
+            throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
         }
 
         if (bucketExists(bucket_name)) {
-            NeoBackedBucket<T> neobucket = new NeoBackedBucket<>(this, bucket_name, getNeoBucketIDFromDb(bucket_name), bucketType);
-            if (!neobucket.persistentLabelIsCorrect()) {
+
+            final NeoBackedBucket<T> neo_bucket = new NeoBackedBucket<>(this, bucket_name, getNeoBucketIDFromDb(bucket_name), bucketType);
+            if (!neo_bucket.persistentLabelIsCorrect())
                 throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
-            }
-            return neobucket;
+
+            return neo_bucket;
         }
 
         throw new RepositoryException("bucket does not exist with name: <" + bucket_name + ">");
@@ -203,12 +182,12 @@ public class Repository implements IRepository {
      * @param name to be checked
      * @return true if the name is legal
      */
-    public static boolean bucketNameIsLegal(String name) {
+    public static boolean bucketNameIsLegal(final String name) {
 
         return name.matches(LEGAL_CHARS_PATTERN);
     }
 
-    public static boolean repositoryNameIsLegal(String name) {
+    public static boolean repositoryNameIsLegal(final String name) {
 
         return name.matches(LEGAL_CHARS_PATTERN);
     }
@@ -216,22 +195,8 @@ public class Repository implements IRepository {
     @Override
     public Iterator<String> getBucketNameIterator() {
 
-        try (Session s = bridge.getNewSession()) {
+        try (final Session s = bridge.getNewSession()) {
             Result result = s.run(ALL_BUCKET_NAMES_QUERY, parameters("repo_name", repository_name));
-            if (result == null) {
-                return new Iterator<>() {
-
-                    @Override
-                    public boolean hasNext() {
-                        return false;
-                    }
-
-                    @Override
-                    public String next() {
-                        throw new NoSuchElementException();
-                    }
-                };
-            }
             return result.list(r -> r.get("b.name").asString()).iterator();
         }
     }

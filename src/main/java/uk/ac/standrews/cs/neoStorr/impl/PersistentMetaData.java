@@ -19,6 +19,7 @@ package uk.ac.standrews.cs.neoStorr.impl;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
 
 public class PersistentMetaData {
+
     private IReferenceType type = null;
     private String type_name;
     protected Class metadata_class = null;
@@ -26,10 +27,16 @@ public class PersistentMetaData {
     public PersistentMetaData() {
     }
 
-    public PersistentMetaData(final Class metadata_class, String type_name) {
+    public PersistentMetaData(final Class metadata_class, final String type_name) {
 
         this.metadata_class = metadata_class;
         this.type_name = type_name;
+    }
+
+    public synchronized IReferenceType getType() {
+
+        if (type == null) initialiseType(metadata_class);
+        return type;
     }
 
     private void initialiseType(final Class metadata_class) {
@@ -37,16 +44,9 @@ public class PersistentMetaData {
         final TypeFactory type_factory = Store.getInstance().getTypeFactory();
 
         type = type_factory.getTypeWithName(type_name);  // if created already use that one
+
         if (type == null) {
             type = type_factory.createType(metadata_class, type_name);  // otherwise create it
         }
-    }
-
-    public IReferenceType getType() {
-
-        if (type == null) {
-            initialiseType(metadata_class);
-        }
-        return type;
     }
 }

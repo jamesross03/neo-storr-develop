@@ -18,11 +18,10 @@ package uk.ac.standrews.cs.neoStorr.impl.transaction.impl;
 
 import org.neo4j.driver.Session;
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
-import uk.ac.standrews.cs.neoStorr.impl.LXPMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.LXPMetaData;
 import uk.ac.standrews.cs.neoStorr.impl.NeoBackedBucket;
 import uk.ac.standrews.cs.neoStorr.impl.PersistentObject;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.StoreException;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces.ITransaction;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 
@@ -41,7 +40,7 @@ public class Transaction implements ITransaction {
 
     private org.neo4j.driver.Transaction tx;
 
-    Transaction(TransactionManager transaction_manager) {
+    Transaction(final TransactionManager transaction_manager) {
 
         transaction_id = String.valueOf(Thread.currentThread().getId()); // TODO this is good enough for a single machine - need to do more work for multiple node support
         session = transaction_manager.getBridge().getNewSession();
@@ -49,7 +48,7 @@ public class Transaction implements ITransaction {
     }
 
     @Override
-    public synchronized void commit() throws StoreException {
+    public synchronized void commit() {
 
         tx.commit();
         close();
@@ -58,32 +57,34 @@ public class Transaction implements ITransaction {
     @Override
     public synchronized void rollback() throws IllegalStateException {
 
-        // TODO does it throw illegal state exception?
+        // TODO does it really throw illegal state exception?
 
         tx.rollback();
-        for (OverwriteRecord undo_state : undo_log) {
 
-            LXP obj = undo_state.obj;
-            NeoBackedBucket b = undo_state.bucket;
-            LXPMetadata md = obj.getMetaData();
+        for (final OverwriteRecord undo_state : undo_log) {
 
-            // Replace the state with that from the store.
+            final LXP obj = undo_state.obj;
+            final NeoBackedBucket bucket = undo_state.bucket;
+            final LXPMetaData meta_data = obj.getMetaData();
+
+            // Replace the state with that from the store, if it exists there.
 
             try {
-                PersistentObject shadow = b.loader(obj.getId());
-                Map<String, Object> undo_map = shadow.serializeFieldsToMap();
+                final PersistentObject shadow = bucket.load(obj.getId());
+                final Map<String, Object> undo_map = shadow.serializeFieldsToMap();
                 // Overwrite the fields of the in memory copy with the data from the store.
 
                 for (Map.Entry<String, Object> entry : undo_map.entrySet()) {
-                    String field_name = entry.getKey();
+                    final String field_name = entry.getKey();
                     if (!field_name.equals(LXP.STORR_ID_KEY)) {
-                        obj.put(md.getSlot(field_name), undo_map.get(field_name));
+                        obj.put(meta_data.getSlot(field_name), undo_map.get(field_name));
                     }
                 }
-            } catch (BucketException e) {
-                throw new RuntimeException(e);
+            } catch (BucketException ignore) {
+                // Persistent object couldn't be loaded if its creation was never committed.
             }
         }
+
         close();
     }
 
@@ -95,7 +96,7 @@ public class Transaction implements ITransaction {
     }
 
     @Override
-    public synchronized void add(IBucket bucket, LXP lxp) {
+    public synchronized void add(final IBucket bucket, LXP lxp) {
 
         // TODO exception if not active?
         if (isActive()) {

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This class implements a index over indexed buckets.
+ * This class implements an index over indexed buckets.
  * Instances of this class are returned by the @methods getIndex of the classes implementing the  @interface IIndexedBucket
  * Created by al on 23/05/2014.
  */

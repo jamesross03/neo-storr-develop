@@ -16,16 +16,16 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces;
 
-import uk.ac.standrews.cs.neoStorr.impl.transaction.exceptions.TransactionFailedException;
-
 /**
  * Created by al on 05/01/15.
  */
 public interface ITransactionManager {
 
-    ITransaction beginTransaction() throws TransactionFailedException;
+    ITransaction beginTransaction();
 
     ITransaction getTransaction(String id);
 
-    void removeTransaction(ITransaction t);
+    void setAutoCommit(boolean auto_commit);
+
+    boolean isAutoCommitEnabled();
 }

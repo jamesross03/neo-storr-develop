@@ -17,7 +17,6 @@
 package uk.ac.standrews.cs.neoStorr.impl;
 
 import org.json.JSONWriter;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.IllegalKeyException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
@@ -25,7 +24,7 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IType;
 import uk.ac.standrews.cs.neoStorr.types.LXPReferenceType;
 
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
@@ -44,94 +43,79 @@ public abstract class StaticLXP extends LXP {
         super();
     }
 
-    public StaticLXP(final long persistent_object_id, Map properties, final IBucket bucket) throws PersistentObjectException {
-        super( persistent_object_id, bucket );
-        initialiseProperties( properties );
+    public StaticLXP(final long persistent_object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
+
+        super(persistent_object_id, bucket);
+        initialiseProperties(properties);
         fixReferences();
     }
 
     protected void fixReferences() throws PersistentObjectException {
-        IReferenceType type = getMetaData().getType();
-        Collection<String> labels = type.getLabels();
-        for( String label : labels ) {
-            IType t = type.getFieldType(label);
-            if( t instanceof LXPReferenceType ) {
-                String serialised = (String) this.get( label );
-                String classname = extractRefType( (LXPReferenceType) type );
+
+        final IReferenceType type = getMetaData().getType();
+        final Collection<String> labels = type.getLabels();
+
+        for (final String label : labels) {
+
+            final IType t = type.getFieldType(label);
+            if (t instanceof LXPReferenceType) {
+
+                final String serialised = (String) get(label);
+                final String class_name = extractRefType((LXPReferenceType) type);
 
                 try {
-                    Class clazz = getClass(classname);
+                    final Class clazz = getClass(class_name);
 
-                    Method makeref = clazz.getDeclaredMethod("makeRef", String.class);
-                    LXPReference newref = (LXPReference) makeref.invoke( null,serialised );
-                    this.put( label, newref );
+                    final Method makeref = clazz.getDeclaredMethod("makeRef", String.class);
+                    final LXPReference newref = (LXPReference) makeref.invoke(null, serialised);
+                    put(label, newref);
 
-
-                } catch (final NoSuchMethodException e) {
-                    throw new PersistentObjectException( "Error in reflective constructor call:" );
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (NoSuchFieldException e) {
-                    e.printStackTrace();
+                } catch (final Exception e) {
+                    throw new PersistentObjectException("Error in reflective constructor call", e);
                 }
             }
         }
     }
 
-    private Class getClass(String name) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    private Class getClass(final String name) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 
-        Iterator<Class> iterator = getLoadedClasses(Thread.currentThread().getContextClassLoader());
-        while( iterator.hasNext() ) {
-            Class clazz = iterator.next();
-            String clazz_name = clazz.getName();
-            if( clazz_name.endsWith(name)) {
-                return clazz;
-            }
+        final Iterator<Class> iterator = getLoadedClasses(Thread.currentThread().getContextClassLoader());
+
+        while (iterator.hasNext()) {
+
+            final Class clazz = iterator.next();
+            if (clazz.getSimpleName().equals(name)) return clazz;
         }
-        throw new ClassNotFoundException( "Could not find a loaded class with name <" + name + ">");
+        throw new ClassNotFoundException("Could not find a loaded class with name <" + name + ">");
     }
 
-    private static Iterator<Class> getLoadedClasses(ClassLoader CL)
-            throws NoSuchFieldException, SecurityException,
-            IllegalArgumentException, IllegalAccessException {
-        Class CL_class = CL.getClass();
-        while (CL_class != java.lang.ClassLoader.class) {
-            CL_class = CL_class.getSuperclass();
-        }
-        java.lang.reflect.Field ClassLoader_classes_field = CL_class
-                .getDeclaredField("classes");
-        ClassLoader_classes_field.setAccessible(true);
-        Vector<Class> classes = (Vector<Class>) ClassLoader_classes_field.get(CL);
-        return classes.iterator();
+    private static Iterator<Class> getLoadedClasses(final ClassLoader class_loader) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+        Class clazz = class_loader.getClass();
+        while (clazz != ClassLoader.class) clazz = clazz.getSuperclass();
+
+        final Field f = clazz.getDeclaredField("classes");
+        f.setAccessible(true);
+        return ((Vector<Class>) f.get(class_loader)).iterator();
     }
 
     /**
-     *
      * @param t - should be a reference type containing a string of form STOREREF[Classname]
-     * @return
      */
     private String extractRefType(LXPReferenceType t) {
-        String rep = t.getRep().getString(0); // slot zero contains "STOREREF[Classname]"
-        String classname = rep.substring( 9,rep.length() -1 );
-        return classname;
+
+        final String rep = t.getRep().getString(0); // slot zero contains "STOREREF[Classname]"
+        return rep.substring("STOREREF[".length(), rep.length() - 1);
     }
 
-
     @Override
-    public void check(final String key) throws IllegalKeyException {
+    public void check(final String key) {
 
-        if (key == null || key.equals("")) {
-            throw new IllegalKeyException("null key");
-        }
+        if (key == null || key.equals("")) throw new RuntimeException("null key");
+
         final Map<String, Integer> field_name_to_slot = getMetaData().getFieldNamesToSlotNumbers();
 
-        if( ! field_name_to_slot.containsKey(key) ) {
-            throw new IllegalKeyException( key );
-        }
+        if (!field_name_to_slot.containsKey(key)) throw new RuntimeException(key);
     }
 
     // Java housekeeping
@@ -144,18 +128,19 @@ public abstract class StaticLXP extends LXP {
 
     public String toString() {
 
-        final StringWriter writer = new StringWriter();
         try {
+            final StringWriter writer = new StringWriter();
             serializeToJSON(new JSONWriter(writer));
+            return writer.toString();
+
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-        return writer.toString();
     }
 
     public int hashCode() {
         return (int) getId();
     }
 
-    public abstract LXPMetadata getMetaData();
+    public abstract LXPMetaData getMetaData();
 }

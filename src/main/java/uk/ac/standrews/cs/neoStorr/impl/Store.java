@@ -18,9 +18,9 @@ package uk.ac.standrews.cs.neoStorr.impl;
 
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.Transaction;
 import org.neo4j.driver.types.Node;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.StoreException;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.impl.TransactionManager;
 import uk.ac.standrews.cs.neoStorr.impl.transaction.interfaces.ITransactionManager;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
@@ -58,10 +58,10 @@ public class Store implements IStore {
     private static final String CREATE_ID_CONSTRAINT_QUERY = "CREATE CONSTRAINT ON (n:STORR_ID) ASSERT n.propertyName IS UNIQUE";
     private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"" + STORR_INDEX_NAME + "\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
 
-    private final List<String> INIT_INDICES_QUERIES = Arrays.asList(CREATE_ID_CONSTRAINT_QUERY, STORR_INDEX_QUERY);
+    private static final List<String> INIT_INDICES_QUERIES = Arrays.asList(CREATE_ID_CONSTRAINT_QUERY, STORR_INDEX_QUERY);
     private static final String SHOW_INDICES_QUERY = "SHOW INDEXES";
 
-    private Store() throws StoreException {
+    private Store() {
 
         try {
             bridge = new NeoDbCypherBridge();
@@ -71,8 +71,8 @@ public class Store implements IStore {
             type_factory = new TypeFactory(this);
             initialiseIndices();
 
-        } catch (RepositoryException e) {
-            throw new StoreException(e);
+        } catch (final RepositoryException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -90,7 +90,9 @@ public class Store implements IStore {
      * Initialises the indices if they are not already set up.
      */
     private void initialiseIndices() {
-        try (Session session = bridge.getNewSession();) {
+
+        try (final Session session = bridge.getNewSession()) {
+
             if (!indicesInitialisedAlready(session)) {
                 for (String query : INIT_INDICES_QUERIES) {
                     session.run(query);
@@ -99,16 +101,15 @@ public class Store implements IStore {
         }
     }
 
-    public void close() throws Exception {
+    public void close() {
         bridge.close();
     }
 
-    private boolean indicesInitialisedAlready(Session session) {
+    private boolean indicesInitialisedAlready(final Session session) {
+
         Result r = session.run(SHOW_INDICES_QUERY);
         while (r.hasNext()) {
-            if (r.next().get("name").asString().equals(STORR_INDEX_NAME)) {
-                return true;
-            }
+            if (r.next().get("name").asString().equals(STORR_INDEX_NAME)) return true;
         }
         return false;
     }
@@ -129,70 +130,71 @@ public class Store implements IStore {
         if (!repositoryNameIsLegal(name)) {
             throw new RepositoryException("Illegal Repository name <" + name + ">");
         }
+
         if (repositoryExists(name)) {
             throw new RepositoryException("Repository with name <" + name + "> already exists");
         }
+
         createRepositoryInNeo(name);
         IRepository r = new Repository(this, name);
         repository_cache.put(name, r);
+
         return r;
     }
 
     @Override
-    public boolean repositoryExists(String name) {
+    public boolean repositoryExists(final String name) {
         return repository_cache.containsKey(name) || repositoryExistsInDB(name);
     }
 
-    private boolean repositoryExistsInDB(String name) {
+    private boolean repositoryExistsInDB(final String name) {
 
-        try (Session s = bridge.getNewSession()) {
+        try (final Session s = bridge.getNewSession()) {
+
             Result result = s.run(REPO_EXISTS_QUERY, parameters("name", name));
             List<Node> nodes = result.list(r -> r.get("r").asNode());
-            return nodes.size() != 0;
+            return !nodes.isEmpty();
         }
     }
 
     @Override
-    public IRepository getRepository(String name) throws RepositoryException {
+    public IRepository getRepository(final String name) throws RepositoryException {
 
         if (repository_cache.containsKey(name)) {
             return repository_cache.get(name);
-        } else {
-            if (repositoryExistsInDB(name)) {
-                IRepository r = new Repository(this, name);
-                repository_cache.put(name, r);
-                return r;
-            }
         }
+
+        if (repositoryExistsInDB(name)) {
+            final IRepository r = new Repository(this, name);
+            repository_cache.put(name, r);
+            return r;
+        }
+
         throw new RepositoryException("repository does not exist: " + name);
     }
 
     @Override
-    public void deleteRepository(String repository_name) throws RepositoryException {
-        if (!repositoryExists(repository_name)) {
+    public void deleteRepository(final String repository_name) throws RepositoryException {
+
+        if (!repositoryExists(repository_name))
             throw new RepositoryException("Bucket " + repository_name + " does not exist");
-        }
 
         repository_cache.remove(repository_name);
 
-        try (Session session = bridge.getNewSession();) {
-            session.writeTransaction(tx -> tx.run(DELETE_REPO_CONTENTS_QUERY, parameters("name", repository_name)));
-            session.writeTransaction(tx -> tx.run(DELETE_EMPTY_REPO_QUERY, parameters("name", repository_name)));
+        try (final Session session = bridge.getNewSession(); final Transaction tx = session.beginTransaction()) {
+
+            tx.run(DELETE_REPO_CONTENTS_QUERY, parameters("name", repository_name));
+            tx.run(DELETE_EMPTY_REPO_QUERY, parameters("name", repository_name));
+            tx.commit();
         }
     }
 
-    public Iterator<IRepository> getIterator() {
-        return null;
-    }
+    private void createRepositoryInNeo(final String name) throws RepositoryException {
 
-    private void createRepositoryInNeo(String name) throws RepositoryException {
+        if (repositoryExists(name)) throw new RepositoryException("Repo: " + name + " already exists");
 
-        if (repositoryExists(name)) {
-            throw new RepositoryException("Repo: " + name + " already exists");
-        }
-
-        try (Session session = bridge.getNewSession()) {
-            session.writeTransaction(tx -> tx.run(CREATE_REPO_QUERY, parameters("name", name)));
+        try (final Session session = bridge.getNewSession()) {
+            session.run(CREATE_REPO_QUERY, parameters("name", name));
         }
     }
 }

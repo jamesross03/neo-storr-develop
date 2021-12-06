@@ -17,7 +17,7 @@
 package uk.ac.standrews.cs.neoStorr.impl.testData;
 
 import uk.ac.standrews.cs.neoStorr.impl.JPO;
-import uk.ac.standrews.cs.neoStorr.impl.JPOMetadata;
+import uk.ac.standrews.cs.neoStorr.impl.JPOMetaData;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.types.JPO_FIELD;
@@ -61,16 +61,16 @@ public class JPOPerson extends JPO {
 
     /* Storr stuff */
 
-    private static final JPOMetadata static_metadata;
+    private static final JPOMetaData static_metadata;
 
     @Override
-    public JPOMetadata getJPOMetaData() {
+    public JPOMetaData getJPOMetaData() {
         return static_metadata;
     }
 
     static {
         try {
-            static_metadata = new JPOMetadata(JPOPerson.class,"JPOPerson");
+            static_metadata = new JPOMetaData(JPOPerson.class,"JPOPerson");
         } catch (Exception var1) {
             throw new RuntimeException(var1);
         }

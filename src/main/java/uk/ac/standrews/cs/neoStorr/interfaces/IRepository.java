@@ -17,9 +17,9 @@
 package uk.ac.standrews.cs.neoStorr.interfaces;
 
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
+import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 /**
@@ -47,7 +47,7 @@ public interface IRepository {
      * @return the newly created repository
      * @throws RepositoryException if a bucket with the name previously exists or if something goes wrong.
      */
-    <T extends LXP> IBucket<T> makeBucket(final String name, Class<T> bucketType) throws RepositoryException, IOException;
+    <T extends LXP> IBucket<T> makeBucket(final String name, Class<T> bucketType) throws RepositoryException, BucketException;
 
     /**
      * @param name - the bucket that is the subject of the enquiry.

@@ -16,10 +16,8 @@
  */
 package uk.ac.standrews.cs.neoStorr.types;
 
-import uk.ac.standrews.cs.neoStorr.impl.TypeFactory;
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
-import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.interfaces.IType;
 
 import java.util.List;
@@ -31,44 +29,30 @@ import java.util.List;
  */
 public class LXPListRefType implements IType {
 
-    private IReferenceType contents_type;
-    private IStore store;
+    private final IReferenceType contents_type;
 
-    LXPListRefType(IReferenceType list_contents_type, IStore store) {
-
-        this.contents_type = list_contents_type;
-        this.store = store;
+    LXPListRefType(final IReferenceType contents_type) {
+        this.contents_type = contents_type;
     }
 
-    public boolean valueConsistentWithType(Object value) {
+    public boolean valueConsistentWithType(final Object value) {
 
-        TypeFactory type_factory = store.getTypeFactory();
+        if (value == null) return true; // permit all null values
 
-        if( value == null ) {
-            return true; // permit all null values
-        }
         if (value instanceof List) {
-            List list = (List) value;
-            if (list.isEmpty()) {
-                return true; // cannot check contents due to type erasure - and is empty so OK.
-            } else {
-                // Need to check the contents of the list are type compatible with expected type.
-                for (Object o : list) {
-                    LXP record = (LXP) o;
-                    if (equals(type_factory.getTypeWithName("lxp"))) { // if we just require an lxp don't do more structural checking.
-                        // all Lxp types match
-                        return true;
-                    } else {
-                        if (!Types.checkStructuralConsistency(record, contents_type)) {
-                            return false;
-                        }
-                    }
-                }
-                // everything checked out
-                return true;
+
+            final List list = (List) value;
+            if (list.isEmpty()) return true; // cannot check contents due to type erasure - and is empty so OK.
+
+            // Need to check the contents of the list are type compatible with expected type.
+            for (final Object o : list) {
+                final LXP record = (LXP) o;
+                if (!Types.checkStructuralConsistency(record, contents_type)) return false;
             }
-        } else {
-            return false;
+            // everything checked out
+            return true;
         }
+
+        return false;
     }
 }

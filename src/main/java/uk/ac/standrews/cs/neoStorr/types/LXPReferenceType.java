@@ -19,10 +19,13 @@ package uk.ac.standrews.cs.neoStorr.types;
 import uk.ac.standrews.cs.neoStorr.impl.DynamicLXP;
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
 import uk.ac.standrews.cs.neoStorr.impl.LXPReference;
+import uk.ac.standrews.cs.neoStorr.impl.Store;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.*;
-import uk.ac.standrews.cs.neoStorr.interfaces.*;
+import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
+import uk.ac.standrews.cs.neoStorr.interfaces.IStoreReference;
+import uk.ac.standrews.cs.neoStorr.interfaces.IType;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * Created by al on 2/11/2014.
@@ -32,7 +35,7 @@ public class LXPReferenceType implements IReferenceType {
 
     private LXP typerep;
 
-    public LXPReferenceType(DynamicLXP typerep) {
+    public LXPReferenceType(final DynamicLXP typerep) {
         this.typerep = typerep;
     }
 
@@ -41,43 +44,34 @@ public class LXPReferenceType implements IReferenceType {
         return typerep;
     }
 
-    public boolean valueConsistentWithType(Object value) {
+    public boolean valueConsistentWithType(final Object value) {
 
-        if( value == null ) {
-            return true; // permit all null values
-        }
-        if (!(value instanceof IStoreReference)) {
-            return false;
-        }
+        if (value == null) return true;
+        if (!(value instanceof IStoreReference)) return false;
 
         try {
-            IStore store = typerep.getRepository().getStore();
-            LXPReference reference = (LXPReference) value;   // This line was changed too!
+            // If we just require an lxp don't do more structural checking.
 
-            // if we just require an lxp don't do more structural checking.
+            return equals(Store.getInstance().getTypeFactory().getTypeWithName("lxp")) ||
+                    Types.checkStructuralConsistency(((LXPReference) value).getReferend(), this);
 
-            return equals(store.getTypeFactory().getTypeWithName("lxp")) || Types.checkStructuralConsistency(reference.getReferend(), this);
-
-        } catch (ReferenceException | BucketException e) {
-            return false;
-        } catch (RepositoryException e) {
+        } catch (RuntimeException | BucketException | RepositoryException e) {
             return false;
         }
     }
 
     @Override
-    public Collection<String> getLabels() {
+    public Set<String> getLabels() {
         return typerep.getMetaData().getFieldNamesToSlotNumbers().keySet();
     }
 
     @Override
-    public IType getFieldType(String label) throws KeyNotFoundException, TypeMismatchFoundException {
+    public IType getFieldType(final String label) {
 
         if (typerep.getMetaData().containsLabel(label)) {
-            String value = (String) typerep.get(label);
-            return Types.stringToType(value, typerep.getRepository().getStore());
-
-        } else return LXPBaseType.UNKNOWN;
+            return Types.stringToType((String) typerep.get(label));
+        }
+        return LXPBaseType.UNKNOWN;
     }
 
     public long getId() {

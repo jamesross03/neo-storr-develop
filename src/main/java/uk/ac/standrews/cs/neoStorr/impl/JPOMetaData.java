@@ -28,16 +28,15 @@ import java.util.Map;
 /**
  * Class to manage mappings between names and slot numbers in LXP.
  */
-public class JPOMetadata extends LXPMetadata {
+public class JPOMetaData extends LXPMetaData {
 
-    private final Map<String,JPOField> jpo_fields = new HashMap<>();
+    private final Map<String, JPOField> jpo_fields = new HashMap<>();
 
+    public JPOMetaData(Class metadata_class, final String type_name) {
 
-    public JPOMetadata(Class metadata_class, final String type_name ) {
-
-        super(metadata_class,type_name);
-        while( metadata_class != null ) {
-            initialiseMaps( metadata_class );
+        super(metadata_class, type_name);
+        while (metadata_class != null) {
+            initialiseMaps(metadata_class);
             metadata_class = metadata_class.getSuperclass(); // run up hierarchy filling in fields
         }
     }
@@ -50,16 +49,16 @@ public class JPOMetadata extends LXPMetadata {
 
             field.setAccessible(true);
 
-            if(! Modifier.isStatic(field.getModifiers() ) && field.isAnnotationPresent(JPO_FIELD.class) ) {
+            if (!Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(JPO_FIELD.class)) {
 
                 String name = field.getName();
                 Class type = field.getType();
 
-                boolean is_list = List.class.isAssignableFrom( type );
-                boolean lxp_ref = type.equals( LXPReference.class );
-                boolean jpo_ref = type.equals( LXPReference.class );
+                boolean is_list = List.class.isAssignableFrom(type);
+                boolean lxp_ref = type.equals(LXPReference.class);
+                boolean jpo_ref = type.equals(LXPReference.class);
 
-                jpo_fields.put( name, new JPOField( name,type,is_list,lxp_ref,jpo_ref ) );
+                jpo_fields.put(name, new JPOField(name, type, is_list, lxp_ref, jpo_ref));
             }
         }
     }
@@ -68,7 +67,7 @@ public class JPOMetadata extends LXPMetadata {
         return jpo_fields.values();
     }
 
-    public JPOField get( String key ) {
+    public JPOField get(String key) {
         return jpo_fields.get(key);
     }
 

@@ -26,6 +26,10 @@ public class BucketException extends Exception {
         super(message);
     }
 
+    public BucketException(final String message, final Exception cause) {
+        super(message, cause);
+    }
+
     public BucketException(final Throwable thrown) {
         super(thrown);
     }

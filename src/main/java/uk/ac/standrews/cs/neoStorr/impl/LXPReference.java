@@ -17,12 +17,9 @@
 package uk.ac.standrews.cs.neoStorr.impl;
 
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.ReferenceException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.StoreException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
-import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStoreReference;
 import uk.ac.standrews.cs.neoStorr.types.LXPBaseType;
 import uk.ac.standrews.cs.neoStorr.types.LXP_SCALAR;
@@ -34,10 +31,10 @@ import java.lang.ref.WeakReference;
  */
 public class LXPReference<T extends LXP> extends StaticLXP implements IStoreReference<T> {
 
-    private static LXPMetadata static_md;
+    private static LXPMetaData static_md;
 
     static {
-            static_md = new LXPMetadata(LXPReference.class, "LXPReference");
+        static_md = new LXPMetaData(LXPReference.class, "LXPReference");
     }
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
@@ -56,32 +53,36 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     /**
      * @param serialized - a String of form repo_name SEPARATOR bucket_name SEPARATOR oid
      */
-    public LXPReference(String serialized) throws ReferenceException {
+    public LXPReference(final String serialized) {
 
         try {
-            String[] tokens = serialized.split(SEPARATOR);
+            final String[] tokens = serialized.split(SEPARATOR);
+
             put(REPOSITORY, tokens[0]);
             put(BUCKET, tokens[1]);
             put(OID, Long.parseLong(tokens[2]));
+
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            throw new ReferenceException(e);
+            throw new RuntimeException(e);
         }
     }
 
-    public LXPReference(String repo_name, String bucket_name, long oid) {
+    public LXPReference(final String repo_name, final String bucket_name, final long oid) {
 
         super();
+
         this.put(REPOSITORY, repo_name);
         this.put(BUCKET, bucket_name);
         this.put(OID, oid);
         // don't bother looking up cache reference on demand or by caller
     }
 
-    public LXPReference(IRepository repo, IBucket bucket, T reference) {
-        this(repo.getStore(), repo.getName(), bucket.getName(), reference);
+    public LXPReference(final IRepository repo, final IBucket bucket, final T reference) {
+        this(repo.getName(), bucket.getName(), reference);
     }
 
-    private LXPReference(IStore store, String repo_name, String bucket_name, T reference) {
+    private LXPReference(final String repo_name, final String bucket_name, final T reference) {
+
         this(repo_name, bucket_name, reference.getId());
         ref = new WeakReference<>(reference);   // TODO was weakRef - make softRef??
     }
@@ -103,7 +104,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     }
 
     @Override
-    public Long getOid() {
+    public long getObjectId() {
         return (long) get(OID);
     }
 
@@ -112,13 +113,13 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         return getReferend(getBucket());
     }
 
-    public T getReferend(Class clazz) throws BucketException, RepositoryException {
+    public T getReferend(final Class clazz) throws BucketException, RepositoryException {
 
         // TODO class is ignored if this reference was created using an explicit reference.
         return getReferend(getBucket(clazz));
     }
 
-    private T getReferend(IBucket<T> b) throws BucketException {
+    private T getReferend(final IBucket<T> bucket) throws BucketException {
 
         // First see if we have a cached reference.
         if (ref != null) {
@@ -127,53 +128,59 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
                 return result;
             }
         }
+
         try {
-            T result = b.getObjectById(getOid());
+            T result = bucket.getObjectById(getObjectId());
             ref = new WeakReference<>(result);  // cache the object we have just loaded.
             return result;
-        } catch (StoreException e) {
+
+        } catch (RuntimeException e) {
             throw new BucketException(e);
         }
     }
 
-    private IBucket<T> getBucket(Class clazz) throws RepositoryException {
+    private IBucket<T> getBucket(final Class clazz) throws RepositoryException {
+
         if (ref != null) {
             T obj = ref.get();
             if (obj != null) {
                 return (IBucket<T>) obj.getBucket();
             }
         }
+
         return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), clazz);
     }
 
     public IBucket getBucket() throws RepositoryException {
+
         if (ref != null) {
             LXP obj = ref.get();
             if (obj != null) {
                 return (IBucket) obj.getBucket();
             }
         }
+
         return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName());
     }
 
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
+    public boolean equals(final Object obj) {
+
+        if (obj == null) return false;
+
         if (obj instanceof LXPReference) {
-            LXPReference sr = (LXPReference) obj;
-            return sr == this || sr.getOid().equals(getOid());
-        } else {
-            return false;
+            LXPReference other_ref = (LXPReference) obj;
+            return other_ref == this || other_ref.getObjectId() == getObjectId();
         }
+
+        return false;
     }
 
     public String toString() {
-        return getRepositoryName() + SEPARATOR + getBucketName() + SEPARATOR + getOid();
+        return getRepositoryName() + SEPARATOR + getBucketName() + SEPARATOR + getObjectId();
     }
 
     @Override
-    public LXPMetadata getMetaData() {
+    public LXPMetaData getMetaData() {
         return static_md;
     }
 }

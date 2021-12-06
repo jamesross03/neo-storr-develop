@@ -206,8 +206,8 @@ public class StoreTest extends CommonTest {
         }
 
         assertEquals(number_of_people, bucket.size());
-        assertTrue(bucket.getOids().containsAll(ids));
-        assertTrue(ids.containsAll(bucket.getOids()));
+        assertTrue(bucket.getObjectIds().containsAll(ids));
+        assertTrue(ids.containsAll(bucket.getObjectIds()));
 
         repository.deleteBucket(NEW_BUCKET_NAME);
     }

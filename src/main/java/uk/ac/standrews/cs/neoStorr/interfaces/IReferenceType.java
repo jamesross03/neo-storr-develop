@@ -17,8 +17,8 @@
 package uk.ac.standrews.cs.neoStorr.interfaces;
 
 import uk.ac.standrews.cs.neoStorr.impl.LXP;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.KeyNotFoundException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.TypeMismatchFoundException;
+
+import java.util.Set;
 
 
 /**
@@ -30,16 +30,15 @@ public interface IReferenceType extends IType {
      * @return the labels present in the type.
      * For example for a type [name: string, age: int] would return {name,age}
      */
-    java.util.Collection<String> getLabels();
+    Set<String> getLabels();
 
     /**
      * @param label - the label whose type is being looked up
      * @return the field type associated with the specified label
      * e.g. for a type [name: string, age: int] and the label "name" this method would return the
      * rep for @class LXPBaseType(INT).
-     * @throws KeyNotFoundException if the key is not found
      */
-    IType getFieldType(String label) throws KeyNotFoundException, TypeMismatchFoundException;
+    IType getFieldType(String label);
 
     /**
      * @return the id of this typerep - this is the id of the underlying rep implementation.

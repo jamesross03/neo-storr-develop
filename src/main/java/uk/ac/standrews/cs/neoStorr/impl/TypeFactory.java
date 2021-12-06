@@ -17,9 +17,7 @@
 package uk.ac.standrews.cs.neoStorr.impl;
 
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.KeyNotFoundException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
-import uk.ac.standrews.cs.neoStorr.impl.exceptions.TypeMismatchFoundException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IReferenceType;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
@@ -41,28 +39,27 @@ public class TypeFactory {
     static final String NAME_FIELD_NAME = "name";
     static final String KEY_FIELD_NAME = "key";
 
-    private IBucket type_reps_bucket;
-    private IBucket type_name_bucket;
-    private IRepository type_repository;
-    private IStore store;
+    private final IBucket type_reps_bucket;
+    private final IBucket type_name_bucket;
+    private final IStore store;
 
-    private Map<String, IReferenceType> names_to_type_cache = new HashMap<>();
-    private Map<Long, IReferenceType> ids_to_type_cache = new HashMap<>();
+    private IRepository type_repository;
+
+    private final Map<String, IReferenceType> names_to_type_cache = new HashMap<>();
+    private final Map<Long, IReferenceType> ids_to_type_cache = new HashMap<>();
 
     protected TypeFactory(final IStore store) throws RepositoryException {
 
         this.store = store;
 
         setupTypeRepository(TYPES_REPOSITORY_NAME);
-        final boolean type_repo_initialised_already = type_repository.bucketExists(TYPE_REPS_BUCKET_NAME);
+
         type_reps_bucket = getBucket(TYPE_REPS_BUCKET_NAME);
         type_name_bucket = getBucket(TYPE_NAMES_BUCKET_NAME);
         loadCaches();
 
-        if (!type_repo_initialised_already) {
-            // initialise predefined types - only 1 for now
-            createAnyType();
-        }
+        // initialise predefined types - only 1 for now
+        if (!type_repository.bucketExists(TYPE_REPS_BUCKET_NAME)) createAnyType();
     }
 
     private void createAnyType() {
@@ -92,16 +89,11 @@ public class TypeFactory {
         return ids_to_type_cache.get(id);
     }
 
-    public boolean containsId(final long id) {
-        return ids_to_type_cache.containsKey(id);
-    }
-
-    //****************** private methods ******************//
-
     private void loadCaches() {
 
         try {
             for (final DynamicLXP lxp : (Iterable<DynamicLXP>) type_name_bucket.getInputStream()) {
+
                 // as set up in @code nameValuePair below.
                 final String name = (String) lxp.get(NAME_FIELD_NAME);
                 final long type_key = (long) lxp.get(KEY_FIELD_NAME);
@@ -114,10 +106,6 @@ public class TypeFactory {
             }
         } catch (final BucketException e) {
             throw new RuntimeException("IO exception getting iterator over type name field_storage", e);
-        } catch (final KeyNotFoundException e) {
-            throw new RuntimeException("Could not find key whilst re-establishing caches", e);
-        } catch (final TypeMismatchFoundException e) {
-            throw new RuntimeException("Type mismatch", e);
         }
     }
 
@@ -126,6 +114,7 @@ public class TypeFactory {
         try {
             final LXP type_rep = ref_type.getRep();
             final LXP name_value = nameValuePair(type_name, type_rep.getId());
+
             type_reps_bucket.makePersistent(type_rep);
             type_name_bucket.makePersistent(name_value);
 

@@ -19,19 +19,20 @@ package uk.ac.standrews.cs.neoStorr.impl;
 import java.lang.reflect.Type;
 
 public class JPOField {
+
     public final String name;
     public final Type type;
-    public final boolean isList;
-    public final boolean isLXPRef;
-    public final boolean isJPORef;
+    public final boolean is_list;
+    public final boolean is_lxp_ref;
+    public final boolean is_jpo_ref;
 
-    public JPOField(String name, Type type, boolean is_list, boolean is_lxp_ref, boolean is_jpo_ref) {
+    public JPOField(final String name, final Type type, final boolean is_list, final boolean is_lxp_ref, final boolean is_jpo_ref) {
+
         this.name = name;
         this.type = type;
-        this.isList = is_list;
-        this.isLXPRef = is_lxp_ref;
-        this.isJPORef = is_jpo_ref;
-
+        this.is_list = is_list;
+        this.is_lxp_ref = is_lxp_ref;
+        this.is_jpo_ref = is_jpo_ref;
     }
 }
 

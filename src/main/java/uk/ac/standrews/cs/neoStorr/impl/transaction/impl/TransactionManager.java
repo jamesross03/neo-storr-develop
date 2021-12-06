@@ -34,6 +34,8 @@ public class TransactionManager implements ITransactionManager {
     private final IStore store;
     private final Map<String, ITransaction> map = Collections.synchronizedMap(new HashMap<>());
 
+    private boolean auto_commit = true;
+
     public TransactionManager(final IStore store) throws RepositoryException {
         this.store = store;
     }
@@ -51,12 +53,12 @@ public class TransactionManager implements ITransactionManager {
         return map.get(id);
     }
 
-    @Override
-    public void removeTransaction(final ITransaction t) {
+    public void setAutoCommit(final boolean auto_commit) {
+        this.auto_commit = auto_commit;
+    }
 
-        if (!t.isActive()) {
-            map.remove(t.getId());
-        }
+    public boolean isAutoCommitEnabled() {
+        return auto_commit;
     }
 
     public NeoDbCypherBridge getBridge() { return store.getBridge(); }
