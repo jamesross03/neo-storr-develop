@@ -27,7 +27,10 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 import uk.ac.standrews.cs.neoStorr.util.NeoDbCypherBridge;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.neo4j.driver.Values.parameters;
 import static uk.ac.standrews.cs.neoStorr.impl.Repository.repositoryNameIsLegal;
@@ -43,7 +46,7 @@ public class Store implements IStore {
     private final TypeFactory type_factory;
     private final Map<String, IRepository> repository_cache;
 
-    private final NeoDbCypherBridge bridge;
+    private NeoDbCypherBridge bridge = null;
 
     private static final String CREATE_REPO_QUERY = "MERGE (a:STORR_REPOSITORY {name: $name})";
     private static final String REPO_EXISTS_QUERY = "MATCH (r:STORR_REPOSITORY {name: $name}) return r";
@@ -71,7 +74,8 @@ public class Store implements IStore {
             type_factory = new TypeFactory(this);
             initialiseIndices();
 
-        } catch (final RepositoryException e) {
+        } catch (final Exception e) {
+            bridge.close();
             throw new RuntimeException(e);
         }
     }
@@ -102,7 +106,9 @@ public class Store implements IStore {
     }
 
     public void close() {
+        System.out.println("close 1");
         bridge.close();
+        System.out.println("close 2");
     }
 
     private boolean indicesInitialisedAlready(final Session session) {
@@ -149,10 +155,18 @@ public class Store implements IStore {
 
     private boolean repositoryExistsInDB(final String name) {
 
+        System.out.println(">>>>>>>>>>> 1xy");
         try (final Session s = bridge.getNewSession()) {
+            System.out.println(">>>>>>>>>>> 2xy");
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("name", name);
 
             Result result = s.run(REPO_EXISTS_QUERY, parameters("name", name));
+            //Result result = s.run(REPO_EXISTS_QUERY, params, TransactionConfig.builder().withTimeout(Duration.ofSeconds(5)).build());
+            System.out.println(">>>>>>>>>>> 3xy");
             List<Node> nodes = result.list(r -> r.get("r").asNode());
+            System.out.println(">>>>>>>>>>> 4y");
             return !nodes.isEmpty();
         }
     }

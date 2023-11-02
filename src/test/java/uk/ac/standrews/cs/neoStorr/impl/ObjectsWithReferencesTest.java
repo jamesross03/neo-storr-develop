@@ -16,7 +16,6 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
