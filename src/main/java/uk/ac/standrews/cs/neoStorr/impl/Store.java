@@ -106,9 +106,7 @@ public class Store implements IStore {
     }
 
     public void close() {
-        System.out.println("close 1");
         bridge.close();
-        System.out.println("close 2");
     }
 
     private boolean indicesInitialisedAlready(final Session session) {
@@ -155,18 +153,10 @@ public class Store implements IStore {
 
     private boolean repositoryExistsInDB(final String name) {
 
-        System.out.println(">>>>>>>>>>> 1xy");
         try (final Session s = bridge.getNewSession()) {
-            System.out.println(">>>>>>>>>>> 2xy");
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("name", name);
 
             Result result = s.run(REPO_EXISTS_QUERY, parameters("name", name));
-            //Result result = s.run(REPO_EXISTS_QUERY, params, TransactionConfig.builder().withTimeout(Duration.ofSeconds(5)).build());
-            System.out.println(">>>>>>>>>>> 3xy");
             List<Node> nodes = result.list(r -> r.get("r").asNode());
-            System.out.println(">>>>>>>>>>> 4y");
             return !nodes.isEmpty();
         }
     }
