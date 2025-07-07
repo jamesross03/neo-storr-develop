@@ -58,7 +58,8 @@ public class Store implements IStore {
     // fully recursive??
 
     private static final String STORR_INDEX_NAME = "StorrIndex";
-    private static final String CREATE_ID_CONSTRAINT_QUERY = "CREATE CONSTRAINT ON (n:STORR_ID) ASSERT n.propertyName IS UNIQUE";
+    private static final String CREATE_ID_CONSTRAINT_QUERY =
+        "CREATE CONSTRAINT storr_id_unique FOR (n:STORR_ID) REQUIRE n.propertyName IS UNIQUE";
     private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"" + STORR_INDEX_NAME + "\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
 
     private static final List<String> INIT_INDICES_QUERIES = Arrays.asList(CREATE_ID_CONSTRAINT_QUERY, STORR_INDEX_QUERY);
