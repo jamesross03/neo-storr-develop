@@ -60,7 +60,8 @@ public class Store implements IStore {
     private static final String STORR_INDEX_NAME = "StorrIndex";
     private static final String CREATE_ID_CONSTRAINT_QUERY =
         "CREATE CONSTRAINT storr_id_unique FOR (n:STORR_ID) REQUIRE n.propertyName IS UNIQUE";
-    private static final String STORR_INDEX_QUERY = "CALL db.createUniquePropertyConstraint(\"" + STORR_INDEX_NAME + "\", [\"STORR_LXP\"], [\"STORR_ID\"], \"native-btree-1.0\")";
+    private static final String STORR_INDEX_QUERY = 
+        String.format("CREATE CONSTRAINT %s FOR (n:%s) REQUIRE n.%s IS UNIQUE", STORR_INDEX_NAME, "STORR_LXP", "STORR_ID");
 
     private static final List<String> INIT_INDICES_QUERIES = Arrays.asList(CREATE_ID_CONSTRAINT_QUERY, STORR_INDEX_QUERY);
     private static final String SHOW_INDICES_QUERY = "SHOW INDEXES";
