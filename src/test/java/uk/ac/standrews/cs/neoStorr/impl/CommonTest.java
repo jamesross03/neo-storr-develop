@@ -16,13 +16,13 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public abstract class CommonTest {
 
@@ -42,7 +42,7 @@ public abstract class CommonTest {
         System.exit(0);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
 
         store = Store.getInstance();
@@ -54,7 +54,7 @@ public abstract class CommonTest {
         repository.makeBucket(BUCKET_NAME);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws RepositoryException {
 
         repository.deleteBucket(BUCKET_NAME);
