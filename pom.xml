@@ -37,8 +37,7 @@
     <properties>
 
         <commons-lang3-version>3.18.0</commons-lang3-version>
-        <neo4j-version>4.4.0</neo4j-version>
-        <neo4j-java-driver-version>4.4.1</neo4j-java-driver-version>
+        <neo4j-java-driver-version>5.11.0</neo4j-java-driver-version>
 
     </properties>
 
@@ -69,12 +68,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3-version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>${neo4j-version}</version>
         </dependency>
 
         <dependency>
