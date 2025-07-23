@@ -51,7 +51,7 @@ public class Repository implements IRepository {
     private final IStore store;
     private final String repository_name;
 
-    private final Map<String, NeoBackedBucket<?>> bucket_cache;
+    private final Map<String, NeoBackedBucket> bucket_cache;
     private final NeoDbCypherBridge bridge;
 
     Repository(final IStore store, final String repository_name) throws RepositoryException {
@@ -67,10 +67,10 @@ public class Repository implements IRepository {
     }
 
     @Override
-    public <T extends LXP> IBucket<T> makeBucket(final String bucket_name) throws RepositoryException {
+    public IBucket makeBucket(final String bucket_name) throws RepositoryException {
 
         makeBucketInNeo(bucket_name); // Throws exception if it already exists in Db
-        NeoBackedBucket<T> bucket = new NeoBackedBucket<>(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
+        NeoBackedBucket bucket = new NeoBackedBucket(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
         bucket_cache.put(bucket_name, bucket);
         return bucket;
     }
@@ -133,25 +133,23 @@ public class Repository implements IRepository {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T extends LXP> IBucket<T> getBucket(final String bucket_name) throws RepositoryException {
+    public IBucket getBucket(final String bucket_name) throws RepositoryException {
 
-        final IBucket<T> bucket = (IBucket<T>) bucket_cache.get(bucket_name);
+        final IBucket bucket = bucket_cache.get(bucket_name);
         if (bucket != null) return bucket;
 
-        if (bucketExists(bucket_name)) return new NeoBackedBucket<>(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
+        if (bucketExists(bucket_name)) return new NeoBackedBucket(this, bucket_name, getNeoBucketIDFromDb(bucket_name));
 
         throw new RepositoryException("bucket does not exist with name: <" + bucket_name + ">");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T extends LXP> IBucket<T> getBucket(final String bucket_name, final Class<T> bucketType) throws RepositoryException {
 
-        final IBucket<T> bucket = (IBucket<T>) bucket_cache.get(bucket_name);
+        final IBucket bucket = bucket_cache.get(bucket_name);
 
         if (bucket != null) {
-            if (((NeoBackedBucket<T>) bucket).bucketTypeIsCorrect(bucketType)) return bucket;
+            if (((NeoBackedBucket) bucket).bucketTypeIsCorrect(bucketType)) return bucket;
 
             throw new RepositoryException("bucket: " + bucket_name + " is not of type: <" + bucketType.getName() + ">");
         }

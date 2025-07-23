@@ -41,7 +41,7 @@ public class LXPListRefType implements IType {
 
         if (value instanceof List) {
 
-            final List<?> list = (List<?>) value;
+            final List list = (List) value;
             if (list.isEmpty()) return true; // cannot check contents due to type erasure - and is empty so OK.
 
             // Need to check the contents of the list are type compatible with expected type.

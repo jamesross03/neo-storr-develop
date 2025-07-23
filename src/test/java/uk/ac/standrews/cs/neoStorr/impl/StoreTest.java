@@ -68,7 +68,7 @@ public class StoreTest extends CommonTest {
     public synchronized void createAndDeleteBucket() throws Exception {
 
         assertFalse(repository.bucketExists(NEW_BUCKET_NAME));
-        final IBucket<?> bucket = repository.makeBucket(NEW_BUCKET_NAME);
+        final IBucket bucket = repository.makeBucket(NEW_BUCKET_NAME);
 
         assertTrue(repository.bucketExists(NEW_BUCKET_NAME));
         assertEquals(NEW_BUCKET_NAME, bucket.getName());
@@ -86,7 +86,7 @@ public class StoreTest extends CommonTest {
         lxp.put("age", "42");
         lxp.put("address", "home");
 
-        final IBucket<DynamicLXP> bucket = repository.getBucket(BUCKET_NAME);
+        final IBucket bucket = repository.getBucket(BUCKET_NAME);
         bucket.makePersistent(lxp);
 
         final LXP retrieved = (LXP) bucket.getObjectById(id);
@@ -299,7 +299,7 @@ public class StoreTest extends CommonTest {
 
         final IRepository types_repository = store.getRepository(TypeFactory.TYPES_REPOSITORY_NAME);
         final IBucket<LXP> type_names_bucket = types_repository.getBucket(TypeFactory.TYPE_NAMES_BUCKET_NAME);
-        final IBucket<?> type_reps_bucket = types_repository.getBucket(TypeFactory.TYPE_REPS_BUCKET_NAME);
+        final IBucket type_reps_bucket = types_repository.getBucket(TypeFactory.TYPE_REPS_BUCKET_NAME);
 
         for (LXP type_name : type_names_bucket.getInputStream()) {
 

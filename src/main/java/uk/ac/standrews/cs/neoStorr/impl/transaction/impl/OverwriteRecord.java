@@ -24,10 +24,10 @@ import uk.ac.standrews.cs.neoStorr.impl.NeoBackedBucket;
  */
 public class OverwriteRecord {
 
-    public final NeoBackedBucket<?> bucket;
+    public final NeoBackedBucket bucket;
     public final LXP obj;
 
-    public OverwriteRecord(final NeoBackedBucket<?> bucket, final LXP obj) {
+    public OverwriteRecord(final NeoBackedBucket bucket, final LXP obj) {
         this.bucket = bucket;
         this.obj = obj;
     }

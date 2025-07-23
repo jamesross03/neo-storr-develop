@@ -44,7 +44,7 @@ public abstract class LXP extends PersistentObject {
         super();
     }
 
-    public LXP(final long object_id, final IBucket<?> bucket) {
+    public LXP(final long object_id, final IBucket bucket) {
         super(object_id, bucket);
     }
 
@@ -170,14 +170,14 @@ public abstract class LXP extends PersistentObject {
      * @param slot - the slot number of the required field
      * @return the list associated with @param label
      */
-    public List<?> getList(final int slot) {
+    public List getList(final int slot) {
 
         try {
-            return (List<?>) field_storage[slot];
+            return (List) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
             throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new RuntimeException("expected List found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -187,22 +187,21 @@ public abstract class LXP extends PersistentObject {
      * @param slot - the slot number of the required field
      * @return the value associated with @param label
      */
-    public IStoreReference<?> getRef(final int slot) {
+    public IStoreReference getRef(final int slot) {
 
         try {
-            return (IStoreReference<?>) field_storage[slot];
+            return (IStoreReference) field_storage[slot];
         } catch (final IndexOutOfBoundsException e) {
             throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new RuntimeException("expected IStoreReference found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
         }
     }
 
     /**
      * @return a reference to the object on which it was called.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public IStoreReference<?> getThisRef() throws PersistentObjectException {
+    public IStoreReference getThisRef() throws PersistentObjectException {
 
         if ($$$bucket$$$bucket$$$ == null) {
             throw new PersistentObjectException("Null bucket encountered in LXP (uncommited LXP reference) : " + this);
@@ -303,7 +302,7 @@ public abstract class LXP extends PersistentObject {
      * @param slot  - the slot number of the required field
      * @param value - the list to associated with the @param label
      */
-    public void put(final int slot, final List<?> value) {
+    public void put(final int slot, final List value) {
 
         putValue(slot, value);
     }
@@ -314,7 +313,7 @@ public abstract class LXP extends PersistentObject {
      * @param slot  - the slot number of the required field
      * @param value - the value to associated with the @param label
      */
-    public void put(final int slot, final IStoreReference<?> value) {
+    public void put(final int slot, final IStoreReference value) {
 
         putValue(slot, value);
     }
@@ -390,7 +389,7 @@ public abstract class LXP extends PersistentObject {
 
             if (value instanceof ArrayList) {
                 writer.array();
-                for (final Object o : (List<?>) value) {
+                for (final Object o : (List) value) {
                     if (o instanceof LXP) {
                         writeReference(writer, (LXP) o);
                     } else {

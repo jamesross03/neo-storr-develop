@@ -37,7 +37,7 @@ public class ObjectsWithReferencesTest extends CommonTest {
 
     private IBucket<Person> typed_bucket1;
     private IBucket<StaticPersonReference> typed_bucket2;
-    private IBucket<?> untyped_bucket;
+    private IBucket untyped_bucket;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -60,7 +60,6 @@ public class ObjectsWithReferencesTest extends CommonTest {
         super.tearDown();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void dereferenceAPersistentDynamicReference() throws Exception {
 
@@ -76,7 +75,6 @@ public class ObjectsWithReferencesTest extends CommonTest {
         assertEquals(al, reference.getReferend());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void deferenceAPersistentStaticReference() throws Exception {
 
@@ -87,7 +85,7 @@ public class ObjectsWithReferencesTest extends CommonTest {
         persistRecord(referer, typed_bucket2);
 
         final StaticPersonReference retrieved_referer = typed_bucket2.getInputStream().iterator().next();
-        final IStoreReference<Person> reference = (IStoreReference<Person>) retrieved_referer.getRef(StaticPersonReference.MY_FIELD);
+        final IStoreReference<Person> reference = retrieved_referer.getRef(StaticPersonReference.MY_FIELD);
 
         assertEquals(al, reference.getReferend());
     }
@@ -102,7 +100,6 @@ public class ObjectsWithReferencesTest extends CommonTest {
         assertEquals(al, al_ref.getReferend(Person.class));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void persistRecord(LXP record, IBucket bucket) throws BucketException {
 
         bucket.makePersistent(record);

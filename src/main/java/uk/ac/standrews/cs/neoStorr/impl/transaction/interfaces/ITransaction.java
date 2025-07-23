@@ -36,5 +36,5 @@ public interface ITransaction {
 
     org.neo4j.driver.Transaction getNeoTransaction();
 
-    void add(IBucket<?> bucket, LXP lxp);
+    void add(IBucket bucket, LXP lxp);
 }

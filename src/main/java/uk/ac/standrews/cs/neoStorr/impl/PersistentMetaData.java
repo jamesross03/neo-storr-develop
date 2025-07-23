@@ -22,12 +22,12 @@ public class PersistentMetaData {
 
     private IReferenceType type = null;
     private String type_name;
-    protected Class<?> metadata_class = null;
+    protected Class metadata_class = null;
 
     public PersistentMetaData() {
     }
 
-    public PersistentMetaData(final Class<?> metadata_class, final String type_name) {
+    public PersistentMetaData(final Class metadata_class, final String type_name) {
 
         this.metadata_class = metadata_class;
         this.type_name = type_name;
@@ -39,7 +39,7 @@ public class PersistentMetaData {
         return type;
     }
 
-    private void initialiseType(final Class<?> metadata_class) {
+    private void initialiseType(final Class metadata_class) {
 
         final TypeFactory type_factory = Store.getInstance().getTypeFactory();
 

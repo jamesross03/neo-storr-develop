@@ -31,7 +31,7 @@ import java.util.Objects;
 public abstract class PersistentObject implements Comparable<PersistentObject> {
 
     protected long $$$$id$$$$id$$$$;
-    protected IBucket<?> $$$bucket$$$bucket$$$ = null;
+    protected IBucket $$$bucket$$$bucket$$$ = null;
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -39,7 +39,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
         $$$$id$$$$id$$$$ = getNextFreePID();
     }
 
-    public PersistentObject(final long object_id, final IBucket<?> bucket) {
+    public PersistentObject(final long object_id, final IBucket bucket) {
 
         $$$$id$$$$id$$$$ = object_id;
         $$$bucket$$$bucket$$$ = bucket;
@@ -53,7 +53,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
         return $$$bucket$$$bucket$$$;
     }
 
-    public abstract IStoreReference<?> getThisRef() throws PersistentObjectException;
+    public abstract IStoreReference getThisRef() throws PersistentObjectException;
 
     /**
      * Writes the state of the LXP to a Bucket.
@@ -61,7 +61,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
      * @param writer the stream to which the state is written.
      * @param bucket @throws JSONException if the record being written cannot be written to legal JSON.
      */
-    public void serializeToJSON(final JSONWriter writer, final IBucket<?> bucket) throws JSONException {
+    public void serializeToJSON(final JSONWriter writer, final IBucket bucket) throws JSONException {
 
         $$$bucket$$$bucket$$$ = bucket;
         serializeToJSON(writer);

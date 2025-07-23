@@ -64,7 +64,7 @@ public class Transaction implements ITransaction {
         for (final OverwriteRecord undo_state : undo_log) {
 
             final LXP obj = undo_state.obj;
-            final NeoBackedBucket<?> bucket = undo_state.bucket;
+            final NeoBackedBucket bucket = undo_state.bucket;
             final LXPMetaData meta_data = obj.getMetaData();
 
             // Replace the state with that from the store, if it exists there.
@@ -96,14 +96,14 @@ public class Transaction implements ITransaction {
     }
 
     @Override
-    public synchronized void add(final IBucket<?> bucket, LXP lxp) {
+    public synchronized void add(final IBucket bucket, LXP lxp) {
 
         // TODO exception if not active?
         if (isActive()) {
             if (!(bucket instanceof NeoBackedBucket)) {
                 throw new RuntimeException("Transactions only support NeoBackedBuckets");
             }
-            undo_log.add(new OverwriteRecord((NeoBackedBucket<?>) bucket, lxp));
+            undo_log.add(new OverwriteRecord((NeoBackedBucket) bucket, lxp));
         }
     }
 

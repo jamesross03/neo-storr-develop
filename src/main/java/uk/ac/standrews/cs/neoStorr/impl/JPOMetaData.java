@@ -32,7 +32,7 @@ public class JPOMetaData extends LXPMetaData {
 
     private final Map<String, JPOField> jpo_fields = new HashMap<>();
 
-    public JPOMetaData(Class<?> metadata_class, final String type_name) {
+    public JPOMetaData(Class metadata_class, final String type_name) {
 
         super(metadata_class, type_name);
         while (metadata_class != null) {
@@ -41,7 +41,7 @@ public class JPOMetaData extends LXPMetaData {
         }
     }
 
-    private void initialiseMaps(final Class<?> c) {
+    private void initialiseMaps(final Class c) {
 
         final Field[] fields = c.getDeclaredFields();
 
@@ -52,7 +52,7 @@ public class JPOMetaData extends LXPMetaData {
             if (!Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(JPO_FIELD.class)) {
 
                 String name = field.getName();
-                Class<?> type = field.getType();
+                Class type = field.getType();
 
                 boolean is_list = List.class.isAssignableFrom(type);
                 boolean lxp_ref = type.equals(LXPReference.class);
@@ -71,7 +71,7 @@ public class JPOMetaData extends LXPMetaData {
         return jpo_fields.get(key);
     }
 
-    public Class<?> getMetadataClass() {
+    public Class getMetadataClass() {
         return metadata_class;
     }
 }
