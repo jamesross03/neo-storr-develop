@@ -21,7 +21,7 @@ import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
 
-public class NeoDbCypherBridge extends NeoDbBridge implements AutoCloseable {
+public class NeoDbCypherBridge extends NeoDbBridge {
 
     private final Driver driver;
 
