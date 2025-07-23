@@ -170,20 +170,20 @@ public class Types {
         throw new RuntimeException("Encountered reference to type not defined: " + value);
     }
 
-    public static DynamicLXP getTypeRep(final Class clazz) {
+    public static DynamicLXP getTypeRep(final Class c) {
 
-        if (StaticLXP.class.isAssignableFrom(clazz) || DynamicLXP.class.isAssignableFrom(clazz)) {
-            return getLXPTypeRep(clazz);
+        if (StaticLXP.class.isAssignableFrom(c) || DynamicLXP.class.isAssignableFrom(c)) {
+            return getLXPTypeRep(c);
         }
 
-        throw new RuntimeException("Do not recognise persistent class: " + clazz.getName());
+        throw new RuntimeException("Do not recognise persistent class: " + c.getName());
     }
 
-    public static DynamicLXP getLXPTypeRep(final Class clazz) {
+    public static DynamicLXP getLXPTypeRep(final Class c) {
 
         final DynamicLXP type_rep = new DynamicLXP();
 
-        for (final Field f : clazz.getDeclaredFields()) {
+        for (final Field f : c.getDeclaredFields()) {
 
             if (Modifier.isStatic(f.getModifiers())) {
 

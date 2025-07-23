@@ -113,10 +113,10 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         return getReferend(getBucket());
     }
 
-    public T getReferend(final Class clazz) throws BucketException, RepositoryException {
+    public T getReferend(final Class c) throws BucketException, RepositoryException {
 
         // TODO class is ignored if this reference was created using an explicit reference.
-        return getReferend(getBucket(clazz));
+        return getReferend(getBucket(c));
     }
 
     private T getReferend(final IBucket<T> bucket) throws BucketException {
@@ -139,7 +139,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         }
     }
 
-    private IBucket<T> getBucket(final Class clazz) throws RepositoryException {
+    private IBucket<T> getBucket(final Class c) throws RepositoryException {
 
         if (ref != null) {
             T obj = ref.get();
@@ -148,7 +148,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
             }
         }
 
-        return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), clazz);
+        return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), c);
     }
 
     public IBucket getBucket() throws RepositoryException {
