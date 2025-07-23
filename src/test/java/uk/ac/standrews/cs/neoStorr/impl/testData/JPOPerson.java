@@ -36,7 +36,7 @@ public class JPOPerson extends JPO {
     public JPOPerson() { // requirement for JPO
     }
 
-    public JPOPerson(long id, Map map, IBucket bucket ) throws PersistentObjectException { // a requirement for JPO
+    public JPOPerson(long id, Map<String, Object> map, IBucket<?> bucket ) throws PersistentObjectException { // a requirement for JPO
         super(id, map, bucket);
     }
 

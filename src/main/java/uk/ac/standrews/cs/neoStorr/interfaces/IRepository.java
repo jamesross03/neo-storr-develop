@@ -33,10 +33,11 @@ public interface IRepository {
      * This method creates a new bucket
      *
      * @param name - the name of the bucket to be created.
+     * @param <T>      the (Java) type which all LXP derived objects in this bucket are expected to be of
      * @return the newly created repository
      * @throws RepositoryException if a bucket with the name previously exists or if something goes wrong.
      */
-    IBucket makeBucket(String name) throws RepositoryException;
+    <T extends LXP> IBucket<T> makeBucket(String name) throws RepositoryException;
 
     /**
      * This method creates a new bucket that is constrained to contain OID records compatible with T.
@@ -68,7 +69,7 @@ public interface IRepository {
      * @return the bucket with the given name, if it exists.
      * @throws RepositoryException if the bucket does not exist or if something goes wrong.
      */
-    IBucket getBucket(final String name) throws RepositoryException;
+    <T extends LXP> IBucket<T> getBucket(final String name) throws RepositoryException;
 
     /**
      * @param name     - the name of the bucket being looked up

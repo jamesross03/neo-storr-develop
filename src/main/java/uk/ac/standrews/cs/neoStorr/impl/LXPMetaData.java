@@ -39,13 +39,13 @@ public class LXPMetaData extends PersistentMetaData {
         super();
     }
 
-    public LXPMetaData(final Class metadata_class, final String type_name) {
+    public LXPMetaData(final Class<?> metadata_class, final String type_name) {
 
         super(metadata_class, type_name);
         initialiseMaps(metadata_class);
     }
 
-    private void initialiseMaps(final Class c) {
+    private void initialiseMaps(final Class<?> c) {
 
         final Field[] fields = c.getDeclaredFields();
         int next_slot = 0;

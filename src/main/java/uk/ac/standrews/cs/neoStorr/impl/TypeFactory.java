@@ -39,8 +39,8 @@ public class TypeFactory {
     static final String NAME_FIELD_NAME = "name";
     static final String KEY_FIELD_NAME = "key";
 
-    private final IBucket type_reps_bucket;
-    private final IBucket type_name_bucket;
+    private final IBucket<LXP> type_reps_bucket;
+    private final IBucket<LXP> type_name_bucket;
     private final IStore store;
 
     private IRepository type_repository;
@@ -69,7 +69,7 @@ public class TypeFactory {
         doHousekeeping("lxp", lxp_type);
     }
 
-    public IReferenceType createType(final Class c, final String type_name) {
+    public IReferenceType createType(final Class<?> c, final String type_name) {
 
         final DynamicLXP type_rep = Types.getTypeRep(c);
         final LXPReferenceType ref_type = new LXPReferenceType(type_rep);
@@ -89,10 +89,11 @@ public class TypeFactory {
         return ids_to_type_cache.get(id);
     }
 
+    @SuppressWarnings("unchecked")
     private void loadCaches() {
 
         try {
-            for (final DynamicLXP lxp : (Iterable<DynamicLXP>) type_name_bucket.getInputStream()) {
+            for (final DynamicLXP lxp : (Iterable<DynamicLXP>)(DynamicLXP)type_name_bucket.getInputStream()) {
 
                 // as set up in @code nameValuePair below.
                 final String name = (String) lxp.get(NAME_FIELD_NAME);
@@ -145,7 +146,7 @@ public class TypeFactory {
         }
     }
 
-    private IBucket getBucket(final String bucket_name) throws RepositoryException {
+    private <T extends LXP> IBucket<T> getBucket(final String bucket_name) throws RepositoryException {
 
         if (type_repository.bucketExists(bucket_name)) {
             return type_repository.getBucket(bucket_name);

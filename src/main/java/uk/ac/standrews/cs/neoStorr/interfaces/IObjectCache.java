@@ -30,14 +30,18 @@ public interface IObjectCache {
      * @param oid    - the object id of the registered object
      * @param bucket - the bucket of the registered object
      * @param tuple  - the tuple to add.
+     * @param <T> - the (Java) type which all LXP derived objects in this bucket
+     * are expected to be of
      */
-    void put(long oid, IBucket bucket, LXP tuple);
+    <T extends LXP> void put(long oid, IBucket<T> bucket, LXP tuple);
 
     /**
      * @param oid - the oid to be loooked up
+     * @param <T> - the (Java) type which all LXP derived objects in this bucket
+     * are expected to be of
      * @return the Bucket from which the oid was loaded
      */
-    IBucket getBucket(long oid);
+    <T extends LXP> IBucket<T> getBucket(long oid);
 
     /**
      * @param oid - the oid to be loooked up

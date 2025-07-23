@@ -77,7 +77,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         // don't bother looking up cache reference on demand or by caller
     }
 
-    public LXPReference(final IRepository repo, final IBucket bucket, final T reference) {
+    public LXPReference(final IRepository repo, final IBucket<T> bucket, final T reference) {
         this(repo.getName(), bucket.getName(), reference);
     }
 
@@ -113,10 +113,11 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         return getReferend(getBucket());
     }
 
-    public T getReferend(final Class clazz) throws BucketException, RepositoryException {
+
+    public T getReferend(final Class<T> c) throws BucketException, RepositoryException {
 
         // TODO class is ignored if this reference was created using an explicit reference.
-        return getReferend(getBucket(clazz));
+        return getReferend(getBucket(c));
     }
 
     private T getReferend(final IBucket<T> bucket) throws BucketException {
@@ -139,7 +140,8 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         }
     }
 
-    private IBucket<T> getBucket(final Class clazz) throws RepositoryException {
+    @SuppressWarnings("unchecked")
+    private IBucket<T> getBucket(final Class<T> c) throws RepositoryException {
 
         if (ref != null) {
             T obj = ref.get();
@@ -148,15 +150,16 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
             }
         }
 
-        return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), clazz);
+        return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), c);
     }
 
-    public IBucket getBucket() throws RepositoryException {
+    @SuppressWarnings("unchecked")
+    public IBucket<T> getBucket() throws RepositoryException {
 
         if (ref != null) {
             LXP obj = ref.get();
             if (obj != null) {
-                return (IBucket) obj.getBucket();
+                return (IBucket<T>) obj.getBucket();
             }
         }
 
@@ -168,7 +171,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         if (obj == null) return false;
 
         if (obj instanceof LXPReference) {
-            LXPReference other_ref = (LXPReference) obj;
+            LXPReference<?> other_ref = (LXPReference<?>) obj;
             return other_ref == this || other_ref.getObjectId() == getObjectId();
         }
 

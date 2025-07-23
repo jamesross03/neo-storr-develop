@@ -19,7 +19,6 @@ package uk.ac.standrews.cs.neoStorr.impl;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.PersistentObjectException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
-import uk.ac.standrews.cs.neoStorr.interfaces.IStoreReference;
 
 import java.util.*;
 
@@ -34,12 +33,12 @@ public abstract class JPO extends StaticLXP {
         super();
     }
 
-    public JPO(final long object_id, final IBucket bucket) {
+    public JPO(final long object_id, final IBucket<?> bucket) {
         this.$$$$id$$$$id$$$$ = object_id;
         this.$$$bucket$$$bucket$$$ = bucket;
     }
 
-    public JPO(final long object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
+    public JPO(final long object_id, final Map<String, Object> properties, final IBucket<?> bucket) throws PersistentObjectException {
         super(object_id, properties, bucket);
     }
 
@@ -48,10 +47,6 @@ public abstract class JPO extends StaticLXP {
     @Override
     public LXPMetaData getMetaData() {
         return getJPOMetaData();
-    }
-
-    public IStoreReference getThisRef() throws PersistentObjectException {
-        return super.getThisRef();
     }
 
     public void put(final String key, Object value) {
@@ -73,7 +68,7 @@ public abstract class JPO extends StaticLXP {
             if (str_val.equals("null")) {
                 value = null;
             } else {
-                value = new LXPReference((String) value);
+                value = new LXPReference<>((String) value);
             }
         }
 

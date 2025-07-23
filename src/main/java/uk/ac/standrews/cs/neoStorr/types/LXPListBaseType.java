@@ -79,7 +79,7 @@ public enum LXPListBaseType implements IType {
     private static boolean check(final Object value, final Object[] test_array) {
 
         if (value instanceof List) {
-            final List list = (List) value;
+            final List<?> list = (List<?>) value;
             if (list.isEmpty()) return true;
 
             try {
