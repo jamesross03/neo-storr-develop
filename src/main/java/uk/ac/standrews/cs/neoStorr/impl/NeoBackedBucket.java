@@ -357,7 +357,6 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         final boolean auto_commit = store.getTransactionManager().isAutoCommitEnabled();
         final Transaction tx = getTransaction(auto_commit);
         runWriteLXPQuery(record_to_write, properties, c, tx);
-        System.out.println("HERE");
         if (auto_commit) tx.commit();
     }
 
