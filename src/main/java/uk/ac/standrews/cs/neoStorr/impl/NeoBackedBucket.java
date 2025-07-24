@@ -57,7 +57,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
 
     private final IStore store;               // the store
     private final String bucket_name;         // the name of this bucket - used as the directory name
-    private final long neo_id;                // the neo4J id of this bucket
+    private final String neo_id;                // the neo4J id of this bucket
     private final NeoDbCypherBridge bridge;
     private Class<T> bucket_type = null;      // the type of records in this bucket if not null.
     private long type_label_id = -1;          // -1 == not set
@@ -72,7 +72,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
      * @param neo_id      the id
      * @throws RepositoryException if the bucket cannot be created in the repository
      */
-    protected NeoBackedBucket(final IRepository repository, final String bucket_name, final long neo_id) throws RepositoryException {
+    protected NeoBackedBucket(final IRepository repository, final String bucket_name, final String neo_id) throws RepositoryException {
 
         if (bucketNameIsIllegal(bucket_name)) throw new RepositoryException("Illegal name <" + bucket_name + ">");
 
@@ -92,7 +92,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
      * @param neo_id      the id
      * @throws RepositoryException if the bucket cannot be created in the repository
      */
-    NeoBackedBucket(final IRepository repository, final String bucket_name, final long neo_id, final Class<T> bucket_type) throws RepositoryException {
+    NeoBackedBucket(final IRepository repository, final String bucket_name, final String neo_id, final Class<T> bucket_type) throws RepositoryException {
 
         this(repository, bucket_name, neo_id);
         this.bucket_type = bucket_type;
@@ -227,7 +227,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         return bucket_type;
     }
 
-    public long getNeoId() {
+    public String getNeoId() {
         return neo_id;
     }
 
@@ -357,6 +357,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         final boolean auto_commit = store.getTransactionManager().isAutoCommitEnabled();
         final Transaction tx = getTransaction(auto_commit);
         runWriteLXPQuery(record_to_write, properties, c, tx);
+        System.out.println("HERE");
         if (auto_commit) tx.commit();
     }
 
@@ -384,7 +385,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         if (nodes.isEmpty())
             throw new BucketException("Cannot write LXP of type: " + record_to_write.getClass().getName() + " and id: " + record_to_write.getId());
 
-        tx.run(ADD_LXP_TO_BUCKET_QUERY, Values.parameters("bucket_id", neo_id, "new_id", nodes.get(0).id()));
+        tx.run(ADD_LXP_TO_BUCKET_QUERY, Values.parameters("bucket_id", neo_id, "new_id", nodes.get(0).elementId()));
     }
 
     private String buildParameterisedWriteLXPQuery(Class<?> c) {
