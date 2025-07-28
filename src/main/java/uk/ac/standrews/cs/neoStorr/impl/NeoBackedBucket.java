@@ -126,7 +126,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
             if (ids.isEmpty())
                 throw new RuntimeException("Could not find type label for bucket with neo_id: " + neo_id);
 
-            return ids.get(0).toString();
+            return ids.get(0).asString();
         }
     }
 
