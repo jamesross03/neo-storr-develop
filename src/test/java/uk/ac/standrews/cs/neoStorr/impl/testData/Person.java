@@ -37,7 +37,7 @@ public class Person extends StaticLXP {
     public Person() {
     }
 
-    public Person(long persistent_object_id, Map properties, IBucket bucket) throws PersistentObjectException {
+    public Person(String persistent_object_id, Map properties, IBucket bucket) throws PersistentObjectException {
         super(persistent_object_id, properties, bucket);
     }
 

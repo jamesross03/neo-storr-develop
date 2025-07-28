@@ -44,7 +44,7 @@ public abstract class LXP extends PersistentObject {
         super();
     }
 
-    public LXP(final long object_id, final IBucket bucket) {
+    public LXP(final String object_id, final IBucket bucket) {
         super(object_id, bucket);
     }
 

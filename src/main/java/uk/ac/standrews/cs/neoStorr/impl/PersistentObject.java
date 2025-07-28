@@ -30,7 +30,10 @@ import java.util.Objects;
 
 public abstract class PersistentObject implements Comparable<PersistentObject> {
 
-    protected long $$$$id$$$$id$$$$;
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final int ID_LENGTH = 16;
+
+    protected String $$$$id$$$$id$$$$;
     protected IBucket $$$bucket$$$bucket$$$ = null;
 
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -39,7 +42,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
         $$$$id$$$$id$$$$ = getNextFreePID();
     }
 
-    public PersistentObject(final long object_id, final IBucket bucket) {
+    public PersistentObject(final String object_id, final IBucket bucket) {
 
         $$$$id$$$$id$$$$ = object_id;
         $$$bucket$$$bucket$$$ = bucket;
@@ -47,7 +50,7 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
         // This constructor used when about to be filled in with values.
     }
 
-    public long getId() { return $$$$id$$$$id$$$$; }
+    public String getId() { return $$$$id$$$$id$$$$; }
 
     public Object getBucket() throws RepositoryException {
         return $$$bucket$$$bucket$$$;
@@ -79,14 +82,17 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
     public abstract PersistentMetaData getMetaData();
 
     /**
-     * @return a pseudo random positive long
+     * @return a pseudo random String
      */
-    private static long getNextFreePID() {
+    private static String getNextFreePID() {
+        StringBuilder stringBuilder = new StringBuilder(ID_LENGTH);
 
-        while (true) {
-            long next_random = RANDOM.nextLong();
-            if (next_random > 0) return next_random;
+        for (int i = 0; i < ID_LENGTH; i++) {
+            int randomIndex = RANDOM.nextInt(CHARACTERS.length());
+            stringBuilder.append(CHARACTERS.charAt(randomIndex));
         }
+
+        return stringBuilder.toString();
     }
 
     @Override
@@ -104,6 +110,6 @@ public abstract class PersistentObject implements Comparable<PersistentObject> {
     }
 
     public int compareTo(final PersistentObject o) {
-        return Long.compare(getId(), o.getId());
+        return getId().compareTo(o.getId());
     }
 }

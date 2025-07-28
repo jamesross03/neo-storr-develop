@@ -34,12 +34,12 @@ public abstract class JPO extends StaticLXP {
         super();
     }
 
-    public JPO(final long object_id, final IBucket bucket) {
+    public JPO(final String object_id, final IBucket bucket) {
         this.$$$$id$$$$id$$$$ = object_id;
         this.$$$bucket$$$bucket$$$ = bucket;
     }
 
-    public JPO(final long object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
+    public JPO(final String object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
         super(object_id, properties, bucket);
     }
 

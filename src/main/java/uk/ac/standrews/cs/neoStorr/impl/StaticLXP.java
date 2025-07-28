@@ -43,7 +43,7 @@ public abstract class StaticLXP extends LXP {
         super();
     }
 
-    public StaticLXP(final long persistent_object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
+    public StaticLXP(final String persistent_object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
 
         super(persistent_object_id, bucket);
         initialiseProperties(properties);
@@ -139,7 +139,7 @@ public abstract class StaticLXP extends LXP {
     }
 
     public int hashCode() {
-        return (int) getId();
+        return getId().hashCode();
     }
 
     public abstract LXPMetaData getMetaData();

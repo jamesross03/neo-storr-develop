@@ -60,8 +60,8 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
     private final String neo_id;                // the neo4J id of this bucket
     private final NeoDbCypherBridge bridge;
     private Class<T> bucket_type = null;      // the type of records in this bucket if not null.
-    private long type_label_id = -1;          // -1 == not set
-    private Cache<Long, PersistentObject> object_cache;
+    private String type_label_id = "";          // "" == not set
+    private Cache<String, PersistentObject> object_cache;
     private int cache_size = DEFAULT_CACHE_SIZE;
 
     /**
@@ -114,9 +114,9 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         return c.equals(bucket_type);
     }
 
-    public long getPersistentTypeLabelID() {
+    public String getPersistentTypeLabelID() {
 
-        if (type_label_id != -1) return type_label_id;
+        if (type_label_id != "") return type_label_id;
 
         try (final Session session = bridge.getNewSession()) {
 
@@ -126,7 +126,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
             if (ids.isEmpty())
                 throw new RuntimeException("Could not find type label for bucket with neo_id: " + neo_id);
 
-            return ids.get(0).asLong();
+            return ids.get(0).toString();
         }
     }
 
@@ -149,7 +149,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         if (cache_size < object_cache.size())
             throw new BucketException("Object cache cannot be dynamically made smaller");
 
-        final LoadingCache<Long, PersistentObject> new_cache = newCache(cache_size);
+        final LoadingCache<String, PersistentObject> new_cache = newCache(cache_size);
         new_cache.putAll(object_cache.asMap());
         this.cache_size = cache_size;
         object_cache = new_cache;
@@ -159,20 +159,20 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         return cache_size;
     }
 
-    private LoadingCache<Long, PersistentObject> newCache(final int cacheSize) {
+    private LoadingCache<String, PersistentObject> newCache(final int cacheSize) {
         return CacheBuilder.newBuilder()
                 .maximumSize(cacheSize)
                 .weakValues()
                 .build(
                         new CacheLoader<>() {
-                            public PersistentObject load(final Long id) throws BucketException {
+                            public PersistentObject load(final String id) throws BucketException {
                                 return NeoBackedBucket.this.load(id);
                             }
                         }
                 );
     }
 
-    public PersistentObject load(final long storr_id) throws BucketException {
+    public PersistentObject load(final String storr_id) throws BucketException {
 
         try (final Session session = bridge.getNewSession()) {
 
@@ -188,20 +188,20 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
                 //  No relevant constructor.
                 if (bucket_type == null) return new DynamicLXP(storr_id, properties, this);
 
-                final Constructor<?> constructor = bucket_type.getConstructor(long.class, Map.class, IBucket.class);
+                final Constructor<?> constructor = bucket_type.getConstructor(String.class, Map.class, IBucket.class);
                 return (PersistentObject) constructor.newInstance(storr_id, properties, this);
 
             } catch (final PersistentObjectException e) {
                 throw new BucketException("Could not create new LXP for object with id: " + storr_id);
             } catch (final NoSuchMethodException e) {
-                throw new BucketException("Error in reflective constructor call: class <" + bucket_type.getName() + "> must implement a constructor with the following signature: Constructor( long persistent_object_id, Map properties, IBucket bucket )");
+                throw new BucketException("Error in reflective constructor call: class <" + bucket_type.getName() + "> must implement a constructor with the following signature: Constructor( String persistent_object_id, Map properties, IBucket bucket )");
             } catch (final IllegalAccessException | InstantiationException | InvocationTargetException e) {
                 throw new BucketException("Error in reflective call of constructor in class " + bucket_type.getName() + ": " + e.getMessage());
             }
         }
     }
 
-    public T getObjectById(final long id) throws BucketException {
+    public T getObjectById(final String id) throws BucketException {
 
         try {
             // this is safe since this.contains(id) and also the cache contains the object.
@@ -231,7 +231,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
         return neo_id;
     }
 
-    public boolean contains(final long storr_id) {
+    public boolean contains(final String storr_id) {
 
         // If auto-commit is off, the id may be present only in the cache, if creation hasn't yet been committed.
         if (!store.getTransactionManager().isAutoCommitEnabled() && object_cache.getIfPresent(storr_id) != null)
@@ -261,15 +261,15 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
     /**
      * @return the ids of records that are in this bucket
      */
-    public synchronized List<Long> getObjectIds() {
+    public synchronized List<String> getObjectIds() {
 
         try (Session session = bridge.getNewSession()) {
 
-            final List<Long> ids = new ArrayList<>();
+            final List<String> ids = new ArrayList<>();
             final Result result = session.run(GET_LXP_OIDS_QUERY, Values.parameters("bucket_id", neo_id));
 
             for (Value v : result.list(r -> r.get("l.STORR_ID"))) {
-                ids.add(v.asLong());
+                ids.add(v.asString());
             }
             return ids;
         }
@@ -287,7 +287,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
 
         if (contains(record.getId())) throw new BucketException("records may not be overwritten - use update");
 
-        if (type_label_id != -1) {
+        if (type_label_id != "") {
 
             // Bucket has a type label, check for consistency.
             if (record.getMetaData().containsLabel(Types.LABEL) && !(Types.checkLabelConsistency(record, type_label_id, store)))
@@ -298,7 +298,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
 
         } else {
             // Bucket has no type label.
-            if (record.getMetaData().containsLabel(Types.LABEL) && !Types.checkStructuralConsistency(record, (long) record.get(Types.LABEL), store))
+            if (record.getMetaData().containsLabel(Types.LABEL) && !Types.checkStructuralConsistency(record, (String) record.get(Types.LABEL), store))
                 throw new BucketException("Structural integrity incompatibility");
         }
     }
@@ -409,7 +409,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
     }
 
     @Override
-    public void delete(final long object_id) throws BucketException {
+    public void delete(final String object_id) throws BucketException {
 
         final boolean auto_commit = store.getTransactionManager().isAutoCommitEnabled();
         final Transaction tx = getTransaction(auto_commit);

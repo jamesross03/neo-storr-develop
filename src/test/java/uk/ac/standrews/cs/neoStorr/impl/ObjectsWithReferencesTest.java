@@ -103,7 +103,7 @@ public class ObjectsWithReferencesTest extends CommonTest {
     private void persistRecord(LXP record, IBucket bucket) throws BucketException {
 
         bucket.makePersistent(record);
-        final long record_id = record.getId();
+        final String record_id = record.getId();
 
         assertTrue(bucket.contains(record_id));
         assertEquals(record, bucket.getObjectById(record_id));

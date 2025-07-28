@@ -43,8 +43,8 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     @LXP_SCALAR(type = LXPBaseType.STRING)
     public static int BUCKET;
 
-    @LXP_SCALAR(type = LXPBaseType.LONG)
-    public static int OID;
+    @LXP_SCALAR(type = LXPBaseType.STRING)
+    public static String OID;
 
     private static final String SEPARATOR = "/";
 
@@ -60,14 +60,14 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
 
             put(REPOSITORY, tokens[0]);
             put(BUCKET, tokens[1]);
-            put(OID, Long.parseLong(tokens[2]));
+            put(OID, tokens[2]);
 
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public LXPReference(final String repo_name, final String bucket_name, final long oid) {
+    public LXPReference(final String repo_name, final String bucket_name, final String oid) {
 
         super();
 
@@ -89,7 +89,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
 
     public LXPReference(LXP record) {
 
-        this((String) record.get(REPOSITORY), (String) record.get(BUCKET), (long) record.get(OID));
+        this((String) record.get(REPOSITORY), (String) record.get(BUCKET), (String) record.get(OID));
         // don't bother looking up cache reference on demand
     }
 
@@ -104,8 +104,8 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     }
 
     @Override
-    public long getObjectId() {
-        return (long) get(OID);
+    public String getObjectId() {
+        return (String) get(OID);
     }
 
     public LXP getReferend() throws BucketException, RepositoryException {
