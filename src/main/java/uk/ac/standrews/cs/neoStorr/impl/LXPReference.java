@@ -44,7 +44,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     public static int BUCKET;
 
     @LXP_SCALAR(type = LXPBaseType.STRING)
-    public static String OID;
+    public static int OID;
 
     private static final String SEPARATOR = "/";
 
