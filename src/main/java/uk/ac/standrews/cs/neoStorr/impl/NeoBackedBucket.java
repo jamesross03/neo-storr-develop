@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -45,7 +46,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
     private static final String ADD_LXP_TO_BUCKET_QUERY = "MATCH(b:STORR_BUCKET),(l:STORR_LXP) WHERE id(b)=$bucket_id AND id(l)=$new_id CREATE (b)-[r:STORR_MEMBER]->(l)";
     private static final String GET_LXPS_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id RETURN l";
     private static final String GET_LXP_BY_STORR_ID_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id AND l.STORR_ID=$storr_id RETURN l";
-    private static final String UPDATE_LXP_PARTIAL_QUERY_BY_STORR_ID = "MATCH (l:STORR_LXP { STORR_ID:$storr_id } ) SET l={ STORR_ID : ";
+    private static final String UPDATE_LXP_QUERY = "MATCH (l:STORR_LXP { STORR_ID: $storr_id }) SET l += $props";
     private static final String GET_LXP_OIDS_QUERY = "MATCH(b:STORR_BUCKET)-[r:STORR_MEMBER]-(l:STORR_LXP) WHERE id(b)=$bucket_id RETURN l.STORR_ID";
     private static final String GET_TYPE_LABEL_QUERY = "MATCH(b:STORR_BUCKET) WHERE id(b)=$bucket_id RETURN b.TYPE_LABEL_ID";
     private static final String SET_TYPE_LABEL_QUERY = "MATCH(b:STORR_BUCKET) WHERE id(b)=$bucket_id SET b.TYPE_LABEL_ID =$type_label";
@@ -308,41 +309,25 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
 
         if (!contains(record_to_update.getId())) throw new BucketException("bucket does not contain specified id");
 
-        final String query = buildUpdateQuery(record_to_update);
-        final boolean auto_commit = store.getTransactionManager().isAutoCommitEnabled();
+        final String query = UPDATE_LXP_QUERY;
 
+        Map<String, Object> props = record_to_update.serializeFieldsToMap();
+        String storrId = record_to_update.getId();
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("storr_id", storrId);
+        parameters.put("props", props);
+
+        final boolean auto_commit = store.getTransactionManager().isAutoCommitEnabled();
         final ITransaction transaction = auto_commit ? store.getTransactionManager().beginTransaction() : getCurrentStorrTransaction();
 
         transaction.add(this, record_to_update);
-        transaction.getNeoTransaction().run(query, Values.parameters("storr_id", record_to_update.getId()));
+        transaction.getNeoTransaction().run(query, Values.parameters(
+            "storr_id", storrId,
+            "props", props
+        ));
 
         if (auto_commit) transaction.commit();
-    }
-
-    private String buildUpdateQuery(final T record_to_update) {
-
-        final StringBuilder query = new StringBuilder(UPDATE_LXP_PARTIAL_QUERY_BY_STORR_ID);
-
-        query.append(record_to_update.getId());
-        appendProperties(query, record_to_update.serializeFieldsToMap());
-        query.append("}");
-
-        return query.toString();
-    }
-
-    private void appendProperties(final StringBuilder query, final Map<String, Object> properties) {
-
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            query.append(", ");
-            query.append(entry.getKey());
-            query.append(" : ");
-            query.append(toSerializationFormat(entry.getValue()));
-        }
-    }
-
-    private String toSerializationFormat(final Object value) {
-
-        return value instanceof String ? ("\"" + value + "\"") : value.toString();
     }
 
     private void writeLXP(final LXP record_to_write) throws BucketException {
