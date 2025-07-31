@@ -26,7 +26,8 @@ public class NeoDbCypherBridge extends NeoDbBridge {
     private final Driver driver;
 
     public NeoDbCypherBridge() {
-        this(DEFAULT_URL, DEFAULT_USER, DEFAULT_PASSWORD);
+        // Note: NeoDBTestURL can be set for unit-testing with Neo4j-harness
+        this(System.getProperty("NeoDBTestURL", DEFAULT_URL), DEFAULT_USER, DEFAULT_PASSWORD);
     }
 
     public NeoDbCypherBridge(String url, String user, String password) {

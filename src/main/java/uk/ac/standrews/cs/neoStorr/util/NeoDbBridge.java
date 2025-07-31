@@ -29,8 +29,7 @@ public abstract class NeoDbBridge implements AutoCloseable {
     protected final String password;
 
     public NeoDbBridge() {
-        // Note: NeoDBTestURL can be set for unit-testing with Neo4j-harness
-        this(System.getProperty("NeoDBTestURL", DEFAULT_URL), DEFAULT_USER, DEFAULT_PASSWORD);
+        this(DEFAULT_URL, DEFAULT_USER, DEFAULT_PASSWORD);
     }
 
     public NeoDbBridge(final String url, final String user, final String password) {
