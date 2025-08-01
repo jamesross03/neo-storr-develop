@@ -23,7 +23,7 @@
     <parent>
         <groupId>uk.ac.standrews.cs</groupId>
         <artifactId>common-pom</artifactId>
-        <version>4.0-SNAPSHOT</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>neo-storr</artifactId>
@@ -39,7 +39,6 @@
         <commons-lang3-version>3.18.0</commons-lang3-version>
         <neo4j-version>5.26.9</neo4j-version>
         <neo4j-java-driver-version>5.26.3</neo4j-java-driver-version>
-        <jdk.version>21</jdk.version>
 
     </properties>
 
@@ -85,16 +84,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.neo4j.test</groupId>
             <artifactId>neo4j-harness</artifactId>
-            <version>5.26.9</version>
+            <version>${neo4j-version}</version>
             <scope>test</scope>
         </dependency>
 
