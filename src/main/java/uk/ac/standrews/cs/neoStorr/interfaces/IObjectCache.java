@@ -31,23 +31,23 @@ public interface IObjectCache {
      * @param bucket - the bucket of the registered object
      * @param tuple  - the tuple to add.
      */
-    void put(long oid, IBucket bucket, LXP tuple);
+    void put(String oid, IBucket bucket, LXP tuple);
 
     /**
      * @param oid - the oid to be loooked up
      * @return the Bucket from which the oid was loaded
      */
-    IBucket getBucket(long oid);
+    IBucket getBucket(String oid);
 
     /**
      * @param oid - the oid to be loooked up
      * @return true if the oid is loaded
      */
-    boolean contains(long oid);
+    boolean contains(String oid);
 
     /**
      * @param id - the id of the tuple to be looked up
      * @return the tuple with the given id if it exists in the cache and null otherwise
      */
-    LXP getObject(long id);
+    LXP getObject(String id);
 }

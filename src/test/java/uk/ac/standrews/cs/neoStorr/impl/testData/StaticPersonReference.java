@@ -38,7 +38,7 @@ public class StaticPersonReference extends StaticLXP {
         put(MY_FIELD, p.getThisRef());
     }
 
-    public StaticPersonReference(long persistent_object_id, Map properties, IBucket bucket) throws PersistentObjectException {
+    public StaticPersonReference(String persistent_object_id, Map properties, IBucket bucket) throws PersistentObjectException {
         super(persistent_object_id, properties, bucket);
     }
 

@@ -43,7 +43,7 @@ public interface IReferenceType extends IType {
     /**
      * @return the id of this typerep - this is the id of the underlying rep implementation.
      */
-    long getId();
+    String getId();
 
     /**
      * @return the OID used to encode the reference type - e.g. [name: string, age: int]

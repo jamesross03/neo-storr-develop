@@ -40,7 +40,7 @@ public class Types {
      * @param <T>           the type of the record being checked
      * @return true if the labels are consistent
      */
-    public static <T extends LXP> boolean checkLabelConsistency(final T record, final long type_label_id, final IStore store) {
+    public static <T extends LXP> boolean checkLabelConsistency(final T record, final String type_label_id, final IStore store) {
 
         final IReferenceType type = record.getMetaData().getType();
         if (type == null) return true;
@@ -61,7 +61,7 @@ public class Types {
      * @param <T>           the type of the record being checked
      * @return true if the structure is consistent
      */
-    public static <T extends LXP> boolean checkStructuralConsistency(final T record, final long type_label_id, final IStore store) {
+    public static <T extends LXP> boolean checkStructuralConsistency(final T record, final String type_label_id, final IStore store) {
 
         final IReferenceType bucket_type = store.getTypeFactory().typeWithId(type_label_id);
         return checkStructuralConsistency(record, bucket_type);
@@ -101,9 +101,9 @@ public class Types {
      * @param type_label_id     the label against which the checking is to be performed
      * @return true if the labels are consistent
      */
-    private static boolean checkLabelsConsistentWith(final long supplied_label_id, final long type_label_id, final IStore store) {
+    private static boolean checkLabelsConsistentWith(final String supplied_label_id, final String type_label_id, final IStore store) {
 
-        if (type_label_id == supplied_label_id) return true; // do id check first
+        if (type_label_id.equals(supplied_label_id)) return true; // do id check first
 
         try {
             // do structural check over type reps
@@ -170,20 +170,20 @@ public class Types {
         throw new RuntimeException("Encountered reference to type not defined: " + value);
     }
 
-    public static DynamicLXP getTypeRep(final Class clazz) {
+    public static DynamicLXP getTypeRep(final Class c) {
 
-        if (StaticLXP.class.isAssignableFrom(clazz) || DynamicLXP.class.isAssignableFrom(clazz)) {
-            return getLXPTypeRep(clazz);
+        if (StaticLXP.class.isAssignableFrom(c) || DynamicLXP.class.isAssignableFrom(c)) {
+            return getLXPTypeRep(c);
         }
 
-        throw new RuntimeException("Do not recognise persistent class: " + clazz.getName());
+        throw new RuntimeException("Do not recognise persistent class: " + c.getName());
     }
 
-    public static DynamicLXP getLXPTypeRep(final Class clazz) {
+    public static DynamicLXP getLXPTypeRep(final Class c) {
 
         final DynamicLXP type_rep = new DynamicLXP();
 
-        for (final Field f : clazz.getDeclaredFields()) {
+        for (final Field f : c.getDeclaredFields()) {
 
             if (Modifier.isStatic(f.getModifiers())) {
 

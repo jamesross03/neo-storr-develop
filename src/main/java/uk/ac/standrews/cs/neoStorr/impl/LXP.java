@@ -44,7 +44,7 @@ public abstract class LXP extends PersistentObject {
         super();
     }
 
-    public LXP(final long object_id, final IBucket bucket) {
+    public LXP(final String object_id, final IBucket bucket) {
         super(object_id, bucket);
     }
 
@@ -177,7 +177,7 @@ public abstract class LXP extends PersistentObject {
         } catch (final IndexOutOfBoundsException e) {
             throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected List found: " + field_storage[slot].getClass().getName());
         }
     }
 
@@ -194,7 +194,7 @@ public abstract class LXP extends PersistentObject {
         } catch (final IndexOutOfBoundsException e) {
             throw new RuntimeException("Illegal slot number: " + slot);
         } catch (final ClassCastException e) {
-            throw new RuntimeException("expected String found: " + field_storage[slot].getClass().getName());
+            throw new RuntimeException("expected Ref found: " + field_storage[slot].getClass().getName());
         }
     }
 

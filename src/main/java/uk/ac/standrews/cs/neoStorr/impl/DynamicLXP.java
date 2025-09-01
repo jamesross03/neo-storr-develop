@@ -36,11 +36,11 @@ public class DynamicLXP extends LXP {
         super();
     }
 
-    public DynamicLXP(final long object_id, final IBucket bucket) {
+    public DynamicLXP(final String object_id, final IBucket bucket) {
         super(object_id, bucket);
     }
 
-    public DynamicLXP(final long persistent_object_id, Map<String,Object> properties, final IBucket bucket) throws PersistentObjectException {
+    public DynamicLXP(final String persistent_object_id, Map<String,Object> properties, final IBucket bucket) throws PersistentObjectException {
 
         this(persistent_object_id, bucket);
         initialiseProperties( properties );
@@ -90,6 +90,6 @@ public class DynamicLXP extends LXP {
     }
 
     public int hashCode() {
-        return (int) getId();
+        return getId().hashCode();
     }
 }
