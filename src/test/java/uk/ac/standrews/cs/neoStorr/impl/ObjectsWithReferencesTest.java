@@ -16,9 +16,9 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.impl.testData.DynamicPersonReference;
@@ -27,8 +27,7 @@ import uk.ac.standrews.cs.neoStorr.impl.testData.StaticPersonReference;
 import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStoreReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectsWithReferencesTest extends CommonTest {
 
@@ -40,7 +39,7 @@ public class ObjectsWithReferencesTest extends CommonTest {
     private IBucket<StaticPersonReference> typed_bucket2;
     private IBucket untyped_bucket;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
 
         super.setUp();
@@ -51,7 +50,7 @@ public class ObjectsWithReferencesTest extends CommonTest {
         untyped_bucket = repository.makeBucket(UNTYPED_BUCKET_NAME);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws RepositoryException {
 
         repository.deleteBucket(TYPED_BUCKET_NAME1);
