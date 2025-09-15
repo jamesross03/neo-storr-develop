@@ -367,7 +367,7 @@ public class NeoBackedBucket<T extends LXP> implements IBucket<T> {
 
     private ITransaction getCurrentStorrTransaction() throws BucketException {
 
-        final ITransaction storr_transaction = store.getTransactionManager().getTransaction(Long.toString(Thread.currentThread().getId()));
+        final ITransaction storr_transaction = store.getTransactionManager().getTransaction(Long.toString(Thread.currentThread().threadId()));
 
         if (storr_transaction == null || !storr_transaction.isActive()) {
             throw new BucketException("No transactional context specified");
