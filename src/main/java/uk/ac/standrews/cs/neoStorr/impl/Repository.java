@@ -94,10 +94,7 @@ public class Repository implements IRepository {
         if (bucketExists(bucket_name)) throw new RepositoryException("Repo: " + bucket_name + " already exists");
 
         try (final Session session = bridge.getNewSession()) {
-            session.executeWrite(tx -> {
-                tx.run(MAKE_BUCKET_QUERY, parameters("repo_name", repository_name, "bucket_name", bucket_name)).consume();
-                return null;
-            });
+            session.writeTransaction(tx -> tx.run(MAKE_BUCKET_QUERY, parameters("repo_name", repository_name, "bucket_name", bucket_name)));
         }
     }
 
@@ -113,7 +110,7 @@ public class Repository implements IRepository {
         }
     }
 
-    public String getNeoBucketIDFromDb(final String bucket_name) throws RepositoryException {
+    public long getNeoBucketIDFromDb(final String bucket_name) throws RepositoryException {
 
         try (final Session s = bridge.getNewSession()) {
 
@@ -122,7 +119,7 @@ public class Repository implements IRepository {
             List<Node> nodes = result.list(r -> r.get("b").asNode());
             if (nodes.isEmpty()) throw new RepositoryException("Bucket id not found for: " + bucket_name);
 
-            return nodes.get(0).elementId();
+            return nodes.get(0).id();
         }
     }
 
@@ -130,10 +127,7 @@ public class Repository implements IRepository {
     public void deleteBucket(final String bucket_name) {
 
         try (final Session session = bridge.getNewSession();) {
-            session.executeWrite(tx -> {
-                tx.run(DELETE_BUCKET_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name)).consume();
-                return null;
-            });
+            session.writeTransaction(tx -> tx.run(DELETE_BUCKET_QUERY, parameters("repo_name", this.repository_name, "bucket_name", bucket_name)));
         }
         bucket_cache.remove(bucket_name);
     }

@@ -43,7 +43,7 @@ public abstract class StaticLXP extends LXP {
         super();
     }
 
-    public StaticLXP(final String persistent_object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
+    public StaticLXP(final long persistent_object_id, final Map properties, final IBucket bucket) throws PersistentObjectException {
 
         super(persistent_object_id, bucket);
         initialiseProperties(properties);
@@ -64,9 +64,9 @@ public abstract class StaticLXP extends LXP {
                 final String class_name = extractRefType((LXPReferenceType) type);
 
                 try {
-                    final Class c = getClass(class_name);
+                    final Class clazz = getClass(class_name);
 
-                    final Method makeref = c.getDeclaredMethod("makeRef", String.class);
+                    final Method makeref = clazz.getDeclaredMethod("makeRef", String.class);
                     final LXPReference newref = (LXPReference) makeref.invoke(null, serialised);
                     put(label, newref);
 
@@ -83,18 +83,18 @@ public abstract class StaticLXP extends LXP {
 
         while (iterator.hasNext()) {
 
-            final Class c = iterator.next();
-            if (c.getSimpleName().equals(name)) return c;
+            final Class clazz = iterator.next();
+            if (clazz.getSimpleName().equals(name)) return clazz;
         }
         throw new ClassNotFoundException("Could not find a loaded class with name <" + name + ">");
     }
 
     private static Iterator<Class> getLoadedClasses(final ClassLoader class_loader) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-        Class c = class_loader.getClass();
-        while (c != ClassLoader.class) c = c.getSuperclass();
+        Class clazz = class_loader.getClass();
+        while (clazz != ClassLoader.class) clazz = clazz.getSuperclass();
 
-        final Field f = c.getDeclaredField("classes");
+        final Field f = clazz.getDeclaredField("classes");
         f.setAccessible(true);
         return ((Vector<Class>) f.get(class_loader)).iterator();
     }
@@ -139,7 +139,7 @@ public abstract class StaticLXP extends LXP {
     }
 
     public int hashCode() {
-        return getId().hashCode();
+        return (int) getId();
     }
 
     public abstract LXPMetaData getMetaData();

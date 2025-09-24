@@ -21,13 +21,12 @@ import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
 
-public class NeoDbCypherBridge extends NeoDbBridge {
+public class NeoDbCypherBridge extends NeoDbBridge implements AutoCloseable {
 
     private final Driver driver;
 
     public NeoDbCypherBridge() {
-        // Note: NeoDBTestURL can be set for unit-testing with Neo4j-harness
-        this(System.getProperty("NeoDBTestURL", DEFAULT_URL), DEFAULT_USER, DEFAULT_PASSWORD);
+        this(DEFAULT_URL, DEFAULT_USER, DEFAULT_PASSWORD);
     }
 
     public NeoDbCypherBridge(String url, String user, String password) {

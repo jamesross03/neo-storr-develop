@@ -16,7 +16,7 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.impl.testData.Car;
 import uk.ac.standrews.cs.neoStorr.impl.testData.JPOPerson;
@@ -27,7 +27,7 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 public class StoreTest extends CommonTest {
 
@@ -82,7 +82,7 @@ public class StoreTest extends CommonTest {
     public synchronized void createAndDeleteDynamicLXP() throws Exception {
 
         final DynamicLXP lxp = new DynamicLXP();
-        final String id = lxp.getId();
+        final long id = lxp.getId();
         lxp.put("age", "42");
         lxp.put("address", "home");
 
@@ -103,7 +103,7 @@ public class StoreTest extends CommonTest {
         final IBucket<Person> bucket = repository.makeBucket(NEW_BUCKET_NAME, Person.class);
 
         final Person al = new Person();
-        final String id = al.getId();
+        final long id = al.getId();
         al.put(Person.FORENAME, "Al");
         al.put(Person.SURNAME, "Dearle");
 
@@ -126,7 +126,7 @@ public class StoreTest extends CommonTest {
         final IBucket<JPOPerson> bucket = repository.makeBucket(NEW_BUCKET_NAME, JPOPerson.class);
 
         final JPOPerson p1 = new JPOPerson(42, "home");
-        final String id = p1.getId();
+        final long id = p1.getId();
         bucket.makePersistent(p1);
 
         final JPOPerson retrieved = bucket.getObjectById(p1.getId());
@@ -193,7 +193,7 @@ public class StoreTest extends CommonTest {
         final IBucket<Person> bucket = repository.makeBucket(NEW_BUCKET_NAME, Person.class);
 
         final int number_of_people = 10;
-        final List<String> ids = new ArrayList<>();
+        final List<Long> ids = new ArrayList<>();
 
         for (int i = 0; i < number_of_people; i++) {
 
@@ -306,7 +306,7 @@ public class StoreTest extends CommonTest {
             final Object name_field = type_name.get(TypeFactory.NAME_FIELD_NAME);
             if (name_field.equals(Person.class.getSimpleName())) {
 
-                final String rep_id = (String) type_name.get(TypeFactory.KEY_FIELD_NAME);
+                final long rep_id = (Long) type_name.get(TypeFactory.KEY_FIELD_NAME);
                 assertTrue(type_reps_bucket.contains(rep_id));
 
                 LXP type_rep = (LXP) type_reps_bucket.getObjectById(rep_id);

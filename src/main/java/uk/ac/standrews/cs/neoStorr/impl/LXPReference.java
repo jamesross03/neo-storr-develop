@@ -43,7 +43,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     @LXP_SCALAR(type = LXPBaseType.STRING)
     public static int BUCKET;
 
-    @LXP_SCALAR(type = LXPBaseType.STRING)
+    @LXP_SCALAR(type = LXPBaseType.LONG)
     public static int OID;
 
     private static final String SEPARATOR = "/";
@@ -60,14 +60,14 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
 
             put(REPOSITORY, tokens[0]);
             put(BUCKET, tokens[1]);
-            put(OID, tokens[2]);
+            put(OID, Long.parseLong(tokens[2]));
 
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public LXPReference(final String repo_name, final String bucket_name, final String oid) {
+    public LXPReference(final String repo_name, final String bucket_name, final long oid) {
 
         super();
 
@@ -89,7 +89,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
 
     public LXPReference(LXP record) {
 
-        this((String) record.get(REPOSITORY), (String) record.get(BUCKET), (String) record.get(OID));
+        this((String) record.get(REPOSITORY), (String) record.get(BUCKET), (long) record.get(OID));
         // don't bother looking up cache reference on demand
     }
 
@@ -104,8 +104,8 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
     }
 
     @Override
-    public String getObjectId() {
-        return (String) get(OID);
+    public long getObjectId() {
+        return (long) get(OID);
     }
 
     public LXP getReferend() throws BucketException, RepositoryException {
@@ -113,10 +113,10 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         return getReferend(getBucket());
     }
 
-    public T getReferend(final Class c) throws BucketException, RepositoryException {
+    public T getReferend(final Class clazz) throws BucketException, RepositoryException {
 
         // TODO class is ignored if this reference was created using an explicit reference.
-        return getReferend(getBucket(c));
+        return getReferend(getBucket(clazz));
     }
 
     private T getReferend(final IBucket<T> bucket) throws BucketException {
@@ -139,7 +139,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
         }
     }
 
-    private IBucket<T> getBucket(final Class c) throws RepositoryException {
+    private IBucket<T> getBucket(final Class clazz) throws RepositoryException {
 
         if (ref != null) {
             T obj = ref.get();
@@ -148,7 +148,7 @@ public class LXPReference<T extends LXP> extends StaticLXP implements IStoreRefe
             }
         }
 
-        return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), c);
+        return Store.getInstance().getRepository(getRepositoryName()).getBucket(getBucketName(), clazz);
     }
 
     public IBucket getBucket() throws RepositoryException {
