@@ -26,7 +26,7 @@ import java.util.List;
  * Each record in the repository is identified by id.
  * <p>
  * Operations in this class mirror those in JDO:
- * T getObjectById(String id) throws BucketException;
+ * T getObjectById(long id) throws BucketException;
  * void makePersistent(T record) throws BucketException;
  */
 public interface IBucket<T extends PersistentObject> {
@@ -38,7 +38,7 @@ public interface IBucket<T extends PersistentObject> {
      * @return an OID record with the specified id, or null if the record cannot be found
      * @throws BucketException if the record cannot be found or if something goes wrong.
      */
-    T getObjectById(String id) throws BucketException;
+    T getObjectById(long id) throws BucketException;
 
     /**
      * Synchronously writes the state of a record to a bucket.
@@ -65,7 +65,7 @@ public interface IBucket<T extends PersistentObject> {
      * @param oid denoting the record to be deleted
      * @throws BucketException if an error occurs during the operation.
      */
-    void delete(String oid) throws BucketException;
+    void delete(long oid) throws BucketException;
 
     /**
      * @param cache_size - set the size of the object cache being implemented by the bucket
@@ -92,7 +92,7 @@ public interface IBucket<T extends PersistentObject> {
     /**
      * @return the oids of the records that are in this bucket
      */
-    List<String> getObjectIds();
+    List<Long> getObjectIds();
 
     /**
      * @return the name of the bucket
@@ -115,7 +115,7 @@ public interface IBucket<T extends PersistentObject> {
      * @param id - an id to lookup
      * @return true if the bucket contains the given id
      */
-    boolean contains(String id);
+    boolean contains(long id);
 
     /**
      * @return the class associated with the bucket if there is one and null if there is not.

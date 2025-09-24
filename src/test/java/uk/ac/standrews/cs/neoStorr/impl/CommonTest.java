@@ -16,24 +16,13 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Session;
-import org.neo4j.harness.Neo4j;
-import org.neo4j.harness.Neo4jBuilders;
-
+import org.junit.After;
+import org.junit.Before;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 import uk.ac.standrews.cs.neoStorr.interfaces.IStore;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.Assert.assertFalse;
 
 public abstract class CommonTest {
 
@@ -43,8 +32,6 @@ public abstract class CommonTest {
     protected IStore store;
     protected IRepository repository;
 
-    static Neo4j neo4jDb;
-    
     public static void main(String[] args) throws RepositoryException {
 
         // Run this to delete existing repository.
@@ -55,16 +42,7 @@ public abstract class CommonTest {
         System.exit(0);
     }
 
-    @BeforeAll
-    static void setUpNeo() {
-        neo4jDb = Neo4jBuilders.newInProcessBuilder()
-                .build();
-        // Sets override for neo-storr.neoDbCypherBridge
-        System.setProperty("NeoDBTestURL", neo4jDb.boltURI().toString());
-    }
-    
-
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
 
         store = Store.getInstance();
@@ -76,28 +54,12 @@ public abstract class CommonTest {
         repository.makeBucket(BUCKET_NAME);
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws RepositoryException {
 
         repository.deleteBucket(BUCKET_NAME);
         store.deleteRepository(REPOSITORY_NAME);
 
         assertFalse(store.repositoryExists(REPOSITORY_NAME));
-    }
-
-    @AfterAll
-    static void tearDownNeo() {
-        System.clearProperty("NeoDBTestURL");
-    }
-
-    @Test
-    public void testNeo4jConnection() {
-        String testString = "Hello world";
-        Driver driver = GraphDatabase.driver(neo4jDb.boltURI(), AuthTokens.none());
-
-        try (Session session = driver.session()) {
-            String response = session.run("RETURN '"+testString+"'").single().get(0).asString();
-             assertEquals(testString, response);
-        }
     }
 }

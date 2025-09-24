@@ -23,11 +23,11 @@
     <parent>
         <groupId>uk.ac.standrews.cs</groupId>
         <artifactId>common-pom</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>neo-storr</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>neo-storr</name>
 
@@ -37,8 +37,8 @@
     <properties>
 
         <commons-lang3-version>3.18.0</commons-lang3-version>
-        <neo4j-version>5.26.9</neo4j-version>
-        <neo4j-java-driver-version>5.26.3</neo4j-java-driver-version>
+        <neo4j-version>4.4.0</neo4j-version>
+        <neo4j-java-driver-version>4.4.1</neo4j-java-driver-version>
 
     </properties>
 
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>uk.ac.standrews.cs</groupId>
             <artifactId>utilities</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -83,13 +83,6 @@
             <version>${neo4j-java-driver-version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.neo4j.test</groupId>
-            <artifactId>neo4j-harness</artifactId>
-            <version>${neo4j-version}</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -98,12 +91,33 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
+
+                <!-- Don't run tests by default since they depend on neo4j being installed. -->
                 <configuration>
-                    <parallel>none</parallel>
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>enable-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+
+                        <configuration>
+                            <skipTests>false</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <developers>
 

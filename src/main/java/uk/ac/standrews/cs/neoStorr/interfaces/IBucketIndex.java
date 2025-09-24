@@ -51,7 +51,7 @@ public interface IBucketIndex<T extends LXP> {
      * @throws IOException     if exception is thrown during operations
      * @throws BucketException if one is thrown during the underlying bucket operations
      */
-    List<String> values(String value) throws IOException, BucketException;
+    List<Long> values(String value) throws IOException, BucketException;
 
     /**
      * Adds a record to the index.

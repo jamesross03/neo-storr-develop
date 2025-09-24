@@ -74,7 +74,7 @@ public class LXPReferenceType implements IReferenceType {
         return LXPBaseType.UNKNOWN;
     }
 
-    public String getId() {
+    public long getId() {
         return typerep.getId();
     }
 }

@@ -30,9 +30,9 @@ public interface IStoreReference<T extends PersistentObject> {
 
     String getRepositoryName();
 
-    String getObjectId();
+    long getObjectId();
 
-    T getReferend(Class c) throws BucketException, RepositoryException;
+    T getReferend(Class clazz) throws BucketException, RepositoryException;
 
     LXP getReferend() throws RepositoryException, BucketException;
 }

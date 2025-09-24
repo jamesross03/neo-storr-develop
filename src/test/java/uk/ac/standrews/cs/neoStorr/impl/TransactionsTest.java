@@ -16,9 +16,9 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.BucketException;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.impl.testData.Person;
@@ -28,7 +28,7 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IBucket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 
 public class TransactionsTest extends CommonTest {
 
@@ -74,7 +74,7 @@ public class TransactionsTest extends CommonTest {
     private List<Person> people = new ArrayList<>();
     private ITransaction transaction;
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
 
         super.setUp();
@@ -82,7 +82,7 @@ public class TransactionsTest extends CommonTest {
         bucket = repository.makeBucket(NEW_BUCKET_NAME, Person.class);
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws RepositoryException {
 
         if (transaction != null && transaction.isActive()) transaction.rollback();
@@ -109,13 +109,11 @@ public class TransactionsTest extends CommonTest {
         assertThatPersistentRecordsContain("John", "Anna", "Rachel");
     }
 
-    @Test
+    @Test(expected = BucketException.class)
     public void createOutsideTransaction() throws BucketException {
 
         store.getTransactionManager().setAutoCommit(false);
-        assertThrows(BucketException.class, () -> {
-            makePersistentPerson();
-        });
+        makePersistentPerson();
     }
 
     @Test
@@ -142,7 +140,7 @@ public class TransactionsTest extends CommonTest {
         assertThatPersistentRecordsContain("John", "Anna", "Rachel");
     }
 
-    @Test
+    @Test(expected = BucketException.class)
     public void createWithRollback() throws Exception {
 
         store.getTransactionManager().setAutoCommit(false);
@@ -152,9 +150,7 @@ public class TransactionsTest extends CommonTest {
         transaction.rollback();
 
         bucket.invalidateCache();
-        assertThrows(BucketException.class, () -> {
-            bucket.getObjectById(people.get(0).getId());
-        });
+        bucket.getObjectById(people.get(0).getId());
     }
 
     @Test
@@ -181,16 +177,13 @@ public class TransactionsTest extends CommonTest {
         assertThatPersistentRecordsContain("Fred", "Jean", "Sian");
     }
 
-    @Test
+    @Test(expected = BucketException.class)
     public void updateOutsideTransaction() throws Exception {
 
         store.getTransactionManager().setAutoCommit(false);
+        makePersistentPerson();
 
-        assertThrows(BucketException.class, () -> {
-            makePersistentPerson();
-            updatePerson();
-        });
-
+        updatePerson();
     }
 
     @Test

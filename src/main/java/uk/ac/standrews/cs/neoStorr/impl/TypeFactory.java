@@ -46,7 +46,7 @@ public class TypeFactory {
     private IRepository type_repository;
 
     private final Map<String, IReferenceType> names_to_type_cache = new HashMap<>();
-    private final Map<String, IReferenceType> ids_to_type_cache = new HashMap<>();
+    private final Map<Long, IReferenceType> ids_to_type_cache = new HashMap<>();
 
     protected TypeFactory(final IStore store) throws RepositoryException {
 
@@ -85,7 +85,7 @@ public class TypeFactory {
         return names_to_type_cache.containsKey(name);
     }
 
-    public IReferenceType typeWithId(final String id) {
+    public IReferenceType typeWithId(final long id) {
         return ids_to_type_cache.get(id);
     }
 
@@ -96,7 +96,7 @@ public class TypeFactory {
 
                 // as set up in @code nameValuePair below.
                 final String name = (String) lxp.get(NAME_FIELD_NAME);
-                final String type_key = (String) lxp.get(KEY_FIELD_NAME);
+                final long type_key = (long) lxp.get(KEY_FIELD_NAME);
 
                 final LXP type_rep = (LXP) type_reps_bucket.getObjectById(type_key);
                 final LXPReferenceType reference = new LXPReferenceType((DynamicLXP) (type_rep));
@@ -126,7 +126,7 @@ public class TypeFactory {
         ids_to_type_cache.put(ref_type.getId(), ref_type);
     }
 
-    private LXP nameValuePair(final String type_name, final String type_key) {
+    private LXP nameValuePair(final String type_name, final long type_key) {
 
         final DynamicLXP lxp = new DynamicLXP();
 
