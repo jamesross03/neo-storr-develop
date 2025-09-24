@@ -42,7 +42,7 @@ public class Transaction implements ITransaction {
 
     Transaction(final TransactionManager transaction_manager) {
 
-        transaction_id = String.valueOf(Thread.currentThread().getId()); // TODO this is good enough for a single machine - need to do more work for multiple node support
+        transaction_id = String.valueOf(Thread.currentThread().threadId()); // TODO this is good enough for a single machine - need to do more work for multiple node support
         session = transaction_manager.getBridge().getNewSession();
         tx = session.beginTransaction();
     }

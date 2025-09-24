@@ -16,7 +16,7 @@
  */
 package uk.ac.standrews.cs.neoStorr.impl;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.standrews.cs.neoStorr.impl.exceptions.RepositoryException;
 import uk.ac.standrews.cs.neoStorr.impl.testData.Car;
 import uk.ac.standrews.cs.neoStorr.impl.testData.JPOPerson;
@@ -27,7 +27,7 @@ import uk.ac.standrews.cs.neoStorr.interfaces.IRepository;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StoreTest extends CommonTest {
 
